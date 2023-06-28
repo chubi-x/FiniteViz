@@ -1,0 +1,2 @@
+# Finite Viz
+FiniteViz is a cloud-based, visual Finite Element Analysis (FEA) solver that lets users visualise their FEA calculations and results. FiniteViz is designed to be a learning tool for engineering students, and is geared toward FEA for non-linear structures.
