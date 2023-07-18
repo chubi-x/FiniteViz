@@ -1,6 +1,6 @@
-from flask import Response
 from typing import Dict
 from enum import Enum
+from flask import Response
 
 DEFAULT_SERVER_ERROR_MESSAGE = "Internal server error."
 DEFAULT_SUCCESS_MESSAGE = "Request successful."
@@ -8,6 +8,7 @@ DEFAULT_TASK_CREATION_SUCCESS_MESSAGE = "Task created successfully."
 DEFAULT_TASK_SUCCESS_MESSAGE = "Task completed successfully."
 DEFAULT_TASK_CREATION_FAILURE_MESSAGE = "Task failed to be created."
 DEFAULT_TASK_FAILURE_MESSAGE = "Task failed."
+DEFAULT_EMPTY_TASK_MESSAGE = "Empty Task"
 
 DEFAULT_SERVER_ERROR_STATUS_CODE = 500
 DEFAULT_CLIENT_ERROR_STATUS_CODE = 400
@@ -19,6 +20,7 @@ class MESSAGE_STATUS(Enum):
     FAILED = "failed"
     SUCCESS = "success"
     RETRY = "retry"
+    EMPTY = "empty task"
 
 
 def __task_response_object(
@@ -97,8 +99,8 @@ def task_creation_success(
 
 
 def empty_task(
-    message=DEFAULT_TASK_CREATION_SUCCESS_MESSAGE,
-    status=DEFAULT_SUCCESS_STATUS_CODE,
+    message=DEFAULT_EMPTY_TASK_MESSAGE,
+    status=DEFAULT_CLIENT_ERROR_STATUS_CODE,
 ) -> Response:
     """Empty task response
 
@@ -110,7 +112,7 @@ def empty_task(
         Response: Flask Response
     """
     return Response(
-        __task_response_object(False, message, MESSAGE_STATUS.FAILED, None),
+        __task_response_object(False, message, MESSAGE_STATUS.EMPTY, None),
         status=status,
         mimetype="application/json",
     )
