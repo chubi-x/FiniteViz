@@ -6,10 +6,32 @@
 #include <SimpleAmqpClient/SimpleAmqpClient.h>
 #include <nlohmann/json.hpp>
 
-#include <boost/pfr.hpp>
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+
 using namespace sw::redis;
 using namespace std;
 using json = nlohmann::json;
+
+namespace logging = boost::log;
+namespace keywords = boost::log::keywords;
+
+void init_logging()
+{
+    logging::register_simple_formatter_factory<logging::trivial::severity_level, char>("Severity");
+
+    logging::add_file_log(
+        keywords::file_name = "worker.log",
+        keywords::format = "[%TimeStamp%] [%ThreadID%] [%Severity%] %Message%");
+
+    // logging::core::get()->set_filter(
+    //     logging::trivial::severity >= logging::trivial::info);
+
+    logging::add_common_attributes();
+}
 
 volatile std::sig_atomic_t keep_running = 1;
 extern "C" void signal_handler(int signal)
@@ -95,7 +117,8 @@ private:
     }
 
 public:
-    ConsumerProducer() : redis(REDIS_HOST), amqp_members(amqp()) {}
+    ConsumerProducer() : redis(REDIS_HOST) {}
+
     Amqp amqp()
     {
         AmqpConnectors amqp_connector;
@@ -110,12 +133,26 @@ public:
 
     void send_results(string &task_id, json &message)
     {
-        this->redis.set(task_id, message.dump());
+        std::cout << "###############################################" << std::endl;
+        std::cout << std::setw(4) << "Sending results to redis" << std::endl;
+        std::cout << "###############################################" << std::endl;
+        try
+        {
+            this->redis.set(task_id, message.dump());
+        }
+        catch (const Error &e)
+        {
+            // log error
+            std::cout << "Error: " << e.what() << endl;
+        }
     }
     void consume()
     {
+        BOOST_LOG_TRIVIAL(info) << "Starting Consumer...";
+
         while (keep_running)
         {
+            amqp_members = amqp();
             AmqpClient::Envelope::ptr_t envelope;
             auto message_delivered = amqp_members.channel->BasicConsumeMessage(amqp_members.consumer_tag, envelope, 1000);
             if (!message_delivered)
@@ -132,36 +169,45 @@ public:
             }
             catch (nlohmann::detail::type_error const &e)
             {
-                std::cerr << "'task_id' key doesn't exist";
+                BOOST_LOG_TRIVIAL(error) << "Provided invalid key 'task_id'" << e;
                 continue;
             }
-            std::list<int64_t> result;
             try
             {
                 auto payload = body["payload"].get<json>();
                 Mesh mesh;
                 setMeshFromJson(mesh, payload);
-                // // update memory store
-                // if (!message_id.empty())
-                // {
-                //     send_results(message_id, j);
-                // }
+                // update memory store
+                if (!message_id.empty())
+                {
+                    send_results(message_id, payload);
+                }
+                else
+                {
+                    json error = {
+                        {"error", "task_id is empty"},
+                    };
+                    send_results(message_id, error);
+                }
                 // acknowledge message
                 amqp_members.channel->BasicAck(envelope);
             }
             catch (nlohmann::detail::type_error const &e)
             {
-                std::cerr << "payload key doesn't exist";
+                BOOST_LOG_TRIVIAL(error) << "Provided invalid key 'payload'" << e;
                 continue;
             }
         }
         // cancel consumer
         amqp_members.channel->BasicCancel(amqp_members.consumer_tag);
+        BOOST_LOG_TRIVIAL(info) << "Consumer cancelled";
+        cout << "Consumer cancelled" << endl;
     }
 };
 
 int main()
 {
+    init_logging();
     ConsumerProducer c;
     c.consume();
     return 0;
