@@ -41,6 +41,15 @@ def __task_response_object(
     )
 
 
+def error_response_object(success: bool, error: str):
+    return json.dumps(
+        {
+            "success": success,
+            "error": error,
+        }
+    )
+
+
 def server_error(
     message: str | None,
     status=DEFAULT_SERVER_ERROR_STATUS_CODE,
@@ -55,10 +64,7 @@ def server_error(
         Response: Flask Response
     """
     return Response(
-        {
-            "success": False,
-            "error": message or DEFAULT_MESSAGES["server_error"],
-        },
+        error_response_object(False, message or DEFAULT_MESSAGES["server_error"]),
         status=status,
         mimetype="application/json",
     )
@@ -75,10 +81,7 @@ def client_error(message: str, status=DEFAULT_CLIENT_ERROR_STATUS_CODE) -> Respo
         Response: Flask Response
     """
     return Response(
-        {
-            "success": False,
-            "error": message,
-        },
+        error_response_object(False, message),
         status=status,
         mimetype="application/json",
     )
