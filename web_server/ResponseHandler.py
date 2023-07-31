@@ -1,14 +1,19 @@
 from typing import Dict
 from enum import Enum
+import json
 from flask import Response
 
-DEFAULT_SERVER_ERROR_MESSAGE = "Internal server error."
-DEFAULT_SUCCESS_MESSAGE = "Request successful."
-DEFAULT_TASK_CREATION_SUCCESS_MESSAGE = "Task created successfully."
-DEFAULT_TASK_SUCCESS_MESSAGE = "Task completed successfully."
-DEFAULT_TASK_CREATION_FAILURE_MESSAGE = "Task failed to be created."
-DEFAULT_TASK_FAILURE_MESSAGE = "Task failed."
-DEFAULT_EMPTY_TASK_MESSAGE = "Empty Task"
+
+DEFAULT_MESSAGES = dict(
+    server_error="Internal server error.",
+    task_creation="Task created successfully.",
+    task_processing="Processing task.",
+    task_success="Task completed successfully.",
+    task_creation_failure="Failed to create task.",
+    task_failure="Task failed.",
+    empty_task="Empty Task",
+)
+
 
 DEFAULT_SERVER_ERROR_STATUS_CODE = 500
 DEFAULT_CLIENT_ERROR_STATUS_CODE = 400
@@ -16,22 +21,24 @@ DEFAULT_SUCCESS_STATUS_CODE = 200
 
 
 class MESSAGE_STATUS(Enum):
-    PROCESSING = "processing"
-    FAILED = "failed"
-    SUCCESS = "success"
-    RETRY = "retry"
-    EMPTY = "empty task"
+    PROCESSING = "PROCESSING"
+    FAILED = "FAILED"
+    SUCCESS = "SUCCESS"
+    RETRY = "RETRY"
+    EMPTY = "EMPTY"
 
 
 def __task_response_object(
-    success: bool, message: str, status: MESSAGE_STATUS, data: Dict | None
-) -> Dict:
-    return {
-        "success": success,
-        "message": message,
-        "status": status,
-        "data": data,
-    }
+    success: bool, message: str, status: str, data: Dict | None
+) -> str:
+    return json.dumps(
+        {
+            "success": success,
+            "message": message,
+            "status": status,
+            "data": data,
+        }
+    )
 
 
 def server_error(
@@ -50,7 +57,7 @@ def server_error(
     return Response(
         {
             "success": False,
-            "error": message or DEFAULT_SERVER_ERROR_MESSAGE,
+            "error": message or DEFAULT_MESSAGES["server_error"],
         },
         status=status,
         mimetype="application/json",
@@ -79,7 +86,7 @@ def client_error(message: str, status=DEFAULT_CLIENT_ERROR_STATUS_CODE) -> Respo
 
 def task_creation_success(
     payload: Dict | None,
-    message=DEFAULT_TASK_CREATION_SUCCESS_MESSAGE,
+    message=DEFAULT_MESSAGES["task_creation"],
     status=DEFAULT_SUCCESS_STATUS_CODE,
 ) -> Response:
     """Response for task creation success
@@ -92,14 +99,14 @@ def task_creation_success(
         Response: Flask Response
     """
     return Response(
-        __task_response_object(True, message, MESSAGE_STATUS.PROCESSING, payload),
+        __task_response_object(True, message, MESSAGE_STATUS.PROCESSING.value, payload),
         status=status,
         mimetype="application/json",
     )
 
 
 def empty_task(
-    message=DEFAULT_EMPTY_TASK_MESSAGE,
+    message=DEFAULT_MESSAGES["empty_task"],
     status=DEFAULT_CLIENT_ERROR_STATUS_CODE,
 ) -> Response:
     """Empty task response
@@ -112,7 +119,7 @@ def empty_task(
         Response: Flask Response
     """
     return Response(
-        __task_response_object(False, message, MESSAGE_STATUS.EMPTY, None),
+        __task_response_object(False, message, MESSAGE_STATUS.EMPTY.value, None),
         status=status,
         mimetype="application/json",
     )
@@ -120,7 +127,7 @@ def empty_task(
 
 def task_creation_error(
     payload: Dict | None,
-    message=DEFAULT_TASK_CREATION_FAILURE_MESSAGE,
+    message=DEFAULT_MESSAGES["task_creation_failure"],
     status=DEFAULT_SERVER_ERROR_STATUS_CODE,
 ) -> Response:
     """Task creation error response
@@ -133,7 +140,7 @@ def task_creation_error(
         Response: Flask Response
     """
     return Response(
-        __task_response_object(False, message, MESSAGE_STATUS.FAILED, payload),
+        __task_response_object(False, message, MESSAGE_STATUS.FAILED.value, payload),
         status=status,
         mimetype="application/json",
     )
@@ -141,10 +148,10 @@ def task_creation_error(
 
 def task_success(
     payload: Dict | None,
-    message=DEFAULT_TASK_SUCCESS_MESSAGE,
+    message=DEFAULT_MESSAGES["task_success"],
     status=DEFAULT_SUCCESS_STATUS_CODE,
 ) -> Response:
-    """Task success message
+    """Task success response
 
     Args:
         message (_type_, optional): Success message_. Defaults to DEFAULT_TASK_SUCCESS_MESSAGE.
@@ -154,7 +161,28 @@ def task_success(
         Response: Flask Response
     """
     return Response(
-        __task_response_object(True, message, MESSAGE_STATUS.SUCCESS, payload),
+        __task_response_object(True, message, MESSAGE_STATUS.SUCCESS.value, payload),
+        status=status,
+        mimetype="application/json",
+    )
+
+
+def task_processing(
+    payload: Dict | None,
+    message=DEFAULT_MESSAGES["task_processing"],
+    status=DEFAULT_SUCCESS_STATUS_CODE,
+) -> Response:
+    """Task processing response
+
+    Args:
+        message (_type_, optional): Success message_. Defaults to DEFAULT_TASK_SUCCESS_MESSAGE.
+        status (_type_, optional): HTTP status code. Defaults to DEFAULT_SUCCESS_STATUS_CODE.
+
+    Returns:
+        Response: Flask Response
+    """
+    return Response(
+        __task_response_object(True, message, MESSAGE_STATUS.PROCESSING.value, payload),
         status=status,
         mimetype="application/json",
     )
@@ -162,7 +190,7 @@ def task_success(
 
 def task_failed(
     payload: Dict | None,
-    message=DEFAULT_TASK_FAILURE_MESSAGE,
+    message=DEFAULT_MESSAGES["task_failure"],
     status=DEFAULT_SERVER_ERROR_STATUS_CODE,
 ) -> Response:
     """Task failure response
@@ -175,7 +203,7 @@ def task_failed(
         Response: Flask Response
     """
     return Response(
-        __task_response_object(False, message, MESSAGE_STATUS.FAILED, payload),
+        __task_response_object(False, message, MESSAGE_STATUS.FAILED.value, payload),
         status=status,
         mimetype="application/json",
     )
