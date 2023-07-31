@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request
 import redis
 from enum import Enum
 import uuid
@@ -16,28 +16,26 @@ app = Flask(__name__)
 publisher = MessagePublisher()
 
 
-class MESSAGE_STATUS(Enum):
-    PROCESSING = "processing"
-    FAILED = "failed"
-    SUCCESS = "success"
-    RETRY = "retry"
-
-
-EMPTY_TASK = {"success": False, "data": {"message": "Task does not exist"}}
-
-
 @app.route("/message", methods=["POST"])
 def message():
     task_id = str(uuid.uuid4())
-    message = {"id": task_id, "payload": request.get_json()}
+    message = {
+        "task_id": task_id,
+        "payload": request.get_json(),
+        "status": ResponseHandler.MESSAGE_STATUS.PROCESSING.value,
+    }
+    # save task to redis
+    redis_store.set(task_id, json.dumps(message))
     message_sent, err = publisher.send_message(message)
     if message_sent:
-        return ResponseHandler.task_creation_success(payload=message)
+        return ResponseHandler.task_creation_success(payload={"task_id": task_id})
     else:
         if err:
-            return ResponseHandler.task_creation_error(payload=message, message=err)
+            return ResponseHandler.task_creation_error(
+                payload={"task_id": task_id}, message=err
+            )
         else:
-            return ResponseHandler.task_creation_error(payload=message)
+            return ResponseHandler.task_creation_error(payload={"task_id": task_id})
 
 
 @app.get("/poll/<id>")
@@ -47,5 +45,20 @@ def poll(id: str):
     except Exception as err:
         return ResponseHandler.server_error(message=str(err))
     if result is not None:
-        return ResponseHandler.task_success(payload=json.loads(result))
+        results_object = json.loads(result)
+        if results_object["status"] == ResponseHandler.MESSAGE_STATUS.SUCCESS.value:
+            return ResponseHandler.task_success(
+                payload={k: results_object[k] for k in ("task_id", "payload")}
+            )
+        elif (
+            results_object["status"] == ResponseHandler.MESSAGE_STATUS.PROCESSING.value
+        ):
+            return ResponseHandler.task_processing(
+                payload={"task_id": results_object["task_id"]}
+            )
+
     return ResponseHandler.empty_task()
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
