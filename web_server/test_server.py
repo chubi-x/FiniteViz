@@ -1,6 +1,5 @@
 from flask import Flask, request
 import redis
-from enum import Enum
 import uuid
 import json
 import logging
@@ -14,7 +13,7 @@ logging.basicConfig(
     filemode="a",
     format="%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s",
     datefmt="%H:%M:%S",
-    level=logging.DEBUG,
+    level=logging.ERROR,
 )
 REDIS_HOST = "172.17.0.4"
 pool = redis.ConnectionPool(host=REDIS_HOST, port=6379, db=0)
@@ -44,11 +43,8 @@ def message():
         return ResponseHandler.task_creation_success(payload={"task_id": task_id})
     else:
         if err:
-            return ResponseHandler.task_creation_error(
-                payload={"task_id": task_id}, message=err
-            )
-        else:
-            return ResponseHandler.task_creation_error(payload={"task_id": task_id})
+            LOGGER.error(f"Error sending message to queue {err}", exc_info=True)
+        return ResponseHandler.task_creation_error(payload={"task_id": task_id})
 
 
 @app.get("/poll/<id>")
