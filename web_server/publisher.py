@@ -1,7 +1,12 @@
 from typing import Tuple
 import pika
 from pika.adapters.blocking_connection import BlockingChannel
-from pika.exceptions import UnroutableError, StreamLostError, AMQPConnectionError
+from pika.exceptions import (
+    UnroutableError,
+    StreamLostError,
+    AMQPConnectionError,
+    ChannelClosedByBroker,
+)
 
 import json
 import logging
@@ -27,9 +32,17 @@ class MessagePublisher:
             )
             LOGGER.info("Creating rabbit connection")
             channel = rabbit_connection.channel()
-            channel.confirm_delivery()
             LOGGER.info("Connecting to channel")
+            # declare queue
+            try:
+                channel.queue_declare(
+                    queue="request", durable=True, exclusive=False, auto_delete=False
+                )
+            except ChannelClosedByBroker as err:
+                LOGGER.exception("Error declaring queue", err)
+                return None
 
+            channel.confirm_delivery()
             return channel
 
         except AMQPConnectionError as connection_error:
@@ -42,7 +55,10 @@ class MessagePublisher:
             channel.basic_publish(
                 exchange="",
                 routing_key=routing_key,
-                properties=pika.BasicProperties(content_type="application/json"),
+                properties=pika.BasicProperties(
+                    content_type="application/json",
+                    delivery_mode=pika.DeliveryMode.Transient,
+                ),
                 body=json.dumps(message),
                 mandatory=True,
             )
