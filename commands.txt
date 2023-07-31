@@ -1,1 +1,1 @@
-Running rabbitmq : g++ <cpp file> -o <executable > -lSimpleAmqpClient -lboost_chrono -lboost_system -lrabbitmq -lrt -lssl -lcrypto -ldl -lpthread
+Running rabbitmq : g++ <cpp file> -o <executable > -lSimpleAmqpClient -lboost_chrono -lboost_system -lrabbitmq -lrt -lssl -lcrypto -ldl -lpthread -lredis++ -lhiredis
