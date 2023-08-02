@@ -1,3 +1,5 @@
+#define BOOST_LOG_DYN_LINK
+// #define BOOST_ALL_DYN_LINK
 #include <iostream>
 #include <signal.h>
 #include <bits/stdc++.h>
@@ -5,6 +7,7 @@
 #include <sw/redis++/redis++.h>
 #include <SimpleAmqpClient/SimpleAmqpClient.h>
 #include <nlohmann/json.hpp>
+#include "FemStdMesh.h"
 
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
@@ -25,6 +28,7 @@ void init_logging()
 
     logging::add_file_log(
         keywords::file_name = "worker.log",
+        keywords::auto_flush = true, // TODO: ONLY FOR DEBUGGING
         keywords::format = "[%TimeStamp%] [%ThreadID%] [%Severity%] %Message%");
 
     // logging::core::get()->set_filter(
@@ -47,7 +51,7 @@ void print(std::vector<float> const &list)
 {
     std::copy(list.begin(),
               list.end(),
-              std::ostream_iterator<float>(std::cout, "\n"));
+              std::ostream_iterator<float>(std::cout, ", "));
 }
 
 class ConsumerProducer
@@ -74,20 +78,15 @@ private:
 
     struct Mesh
     {
-        unordered_map<std::string, int> properties;
-        unordered_map<std::string, std::vector<float>> lists;
+        unordered_map<std::string, std::vector<float>> properties;
     };
     const unordered_map<string, string> propertyToMember = {
-        {"num_elements", "num_elements"},
-        {"num_dimensions", "num_dimensions"},
-        {"num_nodes", "num_nodes"},
-        {"nodes_per_element", "nodes_per_element"},
         {"splitting", "splitting"},
         {"coordinates", "coordinates"},
-        {"elements", "elements"},
+        {"connectivities", "connectivities"},
     };
 
-    void setMeshFromJson(Mesh &mesh, const json &payload)
+    void setMeshFromJson(Mesh &mesh, string &task_id, const json &payload)
     {
         for (const auto &entry : payload.items())
         {
@@ -98,44 +97,48 @@ private:
             if (propertyToMember.find(propertyName) != propertyToMember.end())
             {
                 const string &memberName = propertyToMember.at(propertyName);
-                if (memberName == "coordinates" || memberName == "elements" || memberName == "splitting")
-                {
-                    propertyValue.get_to(mesh.lists[memberName]);
-                    std::cout << memberName << ": " << endl;
-                    print(mesh.lists[memberName]);
-                    continue;
-                }
-                // Use dynamic member access to set the corresponding member of the Mesh struct
-                mesh.properties[memberName] = propertyValue;
-                std::cout << "Mesh: " << mesh.properties[memberName] << endl;
+                propertyValue.get_to(mesh.properties[memberName]);
+                std::cout << memberName << ": [";
+                print(mesh.properties[memberName]);
+                std::cout << "] " << endl;
+                continue;
             }
             else
             {
-                std::cout << "Unknown property from data payload: " << propertyName << endl;
+                BOOST_LOG_TRIVIAL(error) << "Unknown property from data payload: " << task_id << endl;
             }
         }
     }
 
 public:
-    ConsumerProducer() : redis(REDIS_HOST) {}
+    ConsumerProducer() : redis(REDIS_HOST)
+    {
+        init_logging();
+    }
 
     Amqp amqp()
     {
         AmqpConnectors amqp_connector;
+        BOOST_LOG_TRIVIAL(info) << "Creating AMQP Channel...";
+
         auto channel = AmqpClient::Channel::Create(amqp_connector.AMQP_HOST,
                                                    amqp_connector.AMQP_PORT,
                                                    amqp_connector.AMQP_USER,
                                                    amqp_connector.AMQP_PWD,
                                                    amqp_connector.AMQP_VHOST);
+        BOOST_LOG_TRIVIAL(info) << "Channel created successfully!";
+
+        BOOST_LOG_TRIVIAL(info) << "Connecting Consumer to AMQP...";
+
         auto consumer_tag = channel->BasicConsume(amqp_connector.AMQP_QUEUE, "", true, false, false, 1);
+        BOOST_LOG_TRIVIAL(info) << "Consumer connected successfully!";
+
         return {channel, consumer_tag};
     }
 
     void send_results(string &task_id, json &message)
     {
-        std::cout << "###############################################" << std::endl;
-        std::cout << std::setw(4) << "Sending results to redis" << std::endl;
-        std::cout << "###############################################" << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "Sending results for task: " << task_id << " to redis" << std::endl;
         try
         {
             this->redis.set(task_id, message.dump());
@@ -143,16 +146,40 @@ public:
         catch (const Error &e)
         {
             // log error
-            std::cout << "Error: " << e.what() << endl;
+            BOOST_LOG_TRIVIAL(error) << "Error: " << e.what();
+        }
+    }
+    void process_message(string &task_id, json &payload)
+    {
+        Mesh mesh;
+        setMeshFromJson(mesh, task_id, payload);
+
+        // update memory store
+        if (!task_id.empty())
+        {
+            // TODO: if success send results and acknowledge message
+            json payload = {
+                {"task_id", task_id},
+                {"status", "SUCCESS"},
+                {"payload", "hi"}
+
+            };
+            send_results(task_id, payload);
+        }
+        else
+        {
+            json error = {
+                {"error", "task_id is empty"},
+            };
+            send_results(task_id, error);
         }
     }
     void consume()
     {
         BOOST_LOG_TRIVIAL(info) << "Starting Consumer...";
-
+        amqp_members = amqp();
         while (keep_running)
         {
-            amqp_members = amqp();
             AmqpClient::Envelope::ptr_t envelope;
             auto message_delivered = amqp_members.channel->BasicConsumeMessage(amqp_members.consumer_tag, envelope, 1000);
             if (!message_delivered)
@@ -162,53 +189,46 @@ public:
             auto message = envelope->Message();
             auto body = json::parse(message->Body());
             // TODO: convert body to Mesh Struct
-            string message_id = "";
+            string task_id = "";
+            json payload;
             try
             {
-                message_id = body["task_id"];
+                task_id = body["task_id"];
             }
+            // catch error
             catch (nlohmann::detail::type_error const &e)
             {
-                BOOST_LOG_TRIVIAL(error) << "Provided invalid key 'task_id'" << e;
+                BOOST_LOG_TRIVIAL(error) << "Provided invalid key 'task_id'" << e.what();
+                // reject message
+                amqp_members.channel->BasicReject(envelope, false);
                 continue;
             }
             try
             {
-                auto payload = body["payload"].get<json>();
-                Mesh mesh;
-                setMeshFromJson(mesh, payload);
-                // update memory store
-                if (!message_id.empty())
-                {
-                    send_results(message_id, payload);
-                }
-                else
-                {
-                    json error = {
-                        {"error", "task_id is empty"},
-                    };
-                    send_results(message_id, error);
-                }
-                // acknowledge message
-                amqp_members.channel->BasicAck(envelope);
+
+                payload = body["payload"].get<json>();
             }
             catch (nlohmann::detail::type_error const &e)
             {
-                BOOST_LOG_TRIVIAL(error) << "Provided invalid key 'payload'" << e;
+                amqp_members.channel->BasicReject(envelope, false);
+                BOOST_LOG_TRIVIAL(error) << "Provided invalid key 'payload'" << e.what();
                 continue;
             }
+            process_message(task_id, payload);
+            // acknowledge message
+            amqp_members.channel->BasicAck(envelope);
         }
         // cancel consumer
         amqp_members.channel->BasicCancel(amqp_members.consumer_tag);
         BOOST_LOG_TRIVIAL(info) << "Consumer cancelled";
-        cout << "Consumer cancelled" << endl;
+        // cout << "Consumer cancelled" << endl;
     }
 };
 
-int main()
-{
-    init_logging();
-    ConsumerProducer c;
-    c.consume();
-    return 0;
-}
+// int main()
+// {
+//     init_logging();
+//     ConsumerProducer c;
+//     c.consume();
+//     return 0;
+// }
