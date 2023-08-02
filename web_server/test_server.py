@@ -40,11 +40,15 @@ def message():
         return ResponseHandler.server_error(message="Error saving task to redis")
     message_sent, err = publisher.send_message(message)
     if message_sent:
-        return ResponseHandler.task_creation_success(payload={"task_id": task_id})
+        return ResponseHandler.task_creation_success(
+            meta={"task_id": task_id}, payload=None
+        )
     else:
         if err:
             LOGGER.error(f"Error sending message to queue {err}", exc_info=True)
-        return ResponseHandler.task_creation_error(payload={"task_id": task_id})
+        return ResponseHandler.task_creation_error(
+            meta={"task_id": task_id}, payload=None
+        )
 
 
 @app.get("/poll/<id>")
@@ -57,16 +61,23 @@ def poll(id: str):
         results_object = json.loads(result)
         if results_object["status"] == ResponseHandler.MESSAGE_STATUS.SUCCESS.value:
             return ResponseHandler.task_success(
-                payload={k: results_object[k] for k in ("task_id", "payload")}
+                payload={"payload": results_object["payload"]},
+                meta={"task_id": results_object["task_id"]},
             )
         elif (
             results_object["status"] == ResponseHandler.MESSAGE_STATUS.PROCESSING.value
         ):
             return ResponseHandler.task_processing(
-                payload={"task_id": results_object["task_id"]}
+                meta={"task_id": results_object["task_id"]},
+                payload=None,
             )
 
-    return ResponseHandler.empty_task()
+        return ResponseHandler.task_failed(
+            meta={"task_id": results_object["task_id"]},
+            payload=None,
+        )
+
+    return ResponseHandler.empty_task(meta={"task_id": id})
 
 
 if __name__ == "__main__":
