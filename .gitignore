@@ -3,6 +3,9 @@
 __pycache__
 .vscode
 commands.txt
-mpap3_chubi
+
 compute_worker/test
 compute_worker/test.cpp
+web_server/publisher.log
+web_server/server.log
+.vscode/c_cpp_properties.json

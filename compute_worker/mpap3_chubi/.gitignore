@@ -1,0 +1,6 @@
+dev
+ext
+lib
+Makefile
+proj/smsh/*
+!proj/smsh/consumer.h
