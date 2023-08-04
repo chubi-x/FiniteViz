@@ -341,9 +341,49 @@ public:
 			send_results(task_id, error);
 		}
 	}
-	void ack_message(const AmqpClient::Envelope::ptr_t &envelope)
+	void ack_message(const AmqpClient::Envelope::ptr_t &envelope) const
 	{
 		amqp_members.channel->BasicAck(envelope);
+	}
+	static Amqp amqp()
+	{
+		AmqpConnectors amqp_connector;
+		BOOST_LOG_TRIVIAL(info) << "Creating AMQP Channel...";
+
+		auto channel = AmqpClient::Channel::Create(amqp_connector.AMQP_HOST,
+												   amqp_connector.AMQP_PORT,
+												   amqp_connector.AMQP_USER,
+												   amqp_connector.AMQP_PWD,
+												   amqp_connector.AMQP_VHOST);
+		BOOST_LOG_TRIVIAL(info) << "Channel created successfully!";
+
+		BOOST_LOG_TRIVIAL(info) << "Connecting Consumer to AMQP...";
+
+		auto consumer_tag = channel->BasicConsume(amqp_connector.AMQP_QUEUE, "", true, false, false, 1);
+		BOOST_LOG_TRIVIAL(info) << "Consumer connected successfully!";
+
+		return {channel, consumer_tag};
+	}
+
+	void send_results(string &task_id, json &message)
+	{
+		BOOST_LOG_TRIVIAL(info) << "Sending results for task: " << task_id << " to redis" << std::endl;
+		try
+		{
+			this->redis.set(task_id, message.dump());
+			BOOST_LOG_TRIVIAL(info) << "Results for task: " << task_id << " sent successfully" << std::endl;
+		}
+		catch (const Error &e)
+		{
+			// log error
+			BOOST_LOG_TRIVIAL(error) << "Error sending results: " << e.what();
+		}
+	}
+
+public:
+	ConsumerProducer() : redis(REDIS_HOST)
+	{
+		init_logging();
 	}
 
 	/// @brief Begin consuming messages from the queue
