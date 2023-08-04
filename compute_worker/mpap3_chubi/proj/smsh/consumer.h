@@ -68,7 +68,7 @@ private:
 		/// @param property
 		/// @param propertyName
 		template <typename T>
-		static void print(std::vector<std::vector<T>> property, string propertyName = "")
+		static void print(std::vector<std::vector<T>> property, const string propertyName = "")
 		{
 			std::cout << propertyName << ": [";
 			for (std::vector<T> const row : property)
