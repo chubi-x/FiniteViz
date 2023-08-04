@@ -3,6 +3,7 @@ import redis
 import uuid
 import json
 import logging
+import sys
 from publisher import MessagePublisher
 import ResponseHandler
 
@@ -19,7 +20,11 @@ REDIS_HOST = "172.17.0.4"
 pool = redis.ConnectionPool(host=REDIS_HOST, port=6379, db=0)
 redis_store = redis.Redis(connection_pool=pool, decode_responses=True)
 
+payload_keys = ["connectivities", "splitting", "coordinates"]
 app = Flask(__name__)
+app.logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler(stream=sys.stdout)
+app.logger.addHandler(handler)
 
 publisher = MessagePublisher()
 
@@ -27,17 +32,41 @@ publisher = MessagePublisher()
 @app.route("/message", methods=["POST"])
 def message():
     task_id = str(uuid.uuid4())
+    payload = request.get_json()
+    missing = []
+    for key in payload_keys:
+        if key not in payload:
+            missing.append(key)
+            continue
+        elif isinstance(payload[key], list) and (
+            len(payload[key]) > 0 and not isinstance(payload[key][0], list)
+        ):
+            return ResponseHandler.client_error(
+                message=f"key '{key}' is not a 2D array"
+            )
+        else:
+            return ResponseHandler.client_error(
+                message=f"key '{key}' is empty or not an array"
+            )
+    if len(missing) > 0:
+        return ResponseHandler.client_error(
+            message=f"Missing keys '{', '.join(missing)}' in payload"
+        )
+
     message = {
         "task_id": task_id,
-        "payload": request.get_json(),
+        "payload": payload,
         "status": ResponseHandler.MESSAGE_STATUS.PROCESSING.value,
     }
+    # TODO: add validation for request body
+
     # save task to redis
     try:
         redis_store.set(task_id, json.dumps(message))
     except Exception as err:
         LOGGER.error("Error saving task to redis: %s", str(err))
         return ResponseHandler.server_error(message="Error saving task to redis")
+
     message_sent, err = publisher.send_message(message)
     if message_sent:
         return ResponseHandler.task_creation_success(
