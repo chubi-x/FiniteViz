@@ -81,6 +81,16 @@ private:
 			}
 			std::cout << "] " << endl;
 		}
+		template <typename T>
+		static void print(T *array, size_t size)
+		{
+			cout << "[";
+			for (size_t i = 0; i < size; ++i)
+			{
+				cout << array[i] << " , ";
+			}
+			cout << "]";
+		}
 		/// @brief Template function to flatten a vector of vectors
 		/// @tparam T
 		/// @param input
@@ -88,8 +98,6 @@ private:
 		template <typename T>
 		static std::vector<T> flatten(const std::vector<std::vector<T>> &input)
 		{
-			cout << "Flattening vector of vectors" << endl;
-			print(input, "vector to be flattened:");
 			size_t totalSize = 0;
 			for (const auto &innerVector : input)
 			{
@@ -102,15 +110,6 @@ private:
 			{
 				flattened.insert(flattened.end(), innerVector.begin(), innerVector.end());
 			}
-
-			cout << "Flattened vector:" << endl;
-			cout << "[";
-			for (T const row : flattened)
-			{
-				cout << row << " , ";
-			}
-			cout << "]";
-
 			return flattened;
 		}
 	};
