@@ -137,10 +137,6 @@ private:
 		std::size_t num_dims;
 		std::size_t num_elements;
 		std::size_t nodes_per_element;
-		// int num_nodes;
-		// int num_dims;
-		// int num_elements;
-		// int nodes_per_element;
 		std::vector<std::vector<double>> coordinates;
 		std::vector<std::vector<int>> connectivities;
 		std::vector<std::vector<int>> splitting;
