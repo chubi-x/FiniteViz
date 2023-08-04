@@ -214,79 +214,27 @@ private:
 		}
 		return valid_json;
 	}
-
-public:
-	ConsumerProducer() : redis(REDIS_HOST)
-	{
-		init_logging();
-	}
-
-	Amqp amqp()
-	{
-		AmqpConnectors amqp_connector;
-		BOOST_LOG_TRIVIAL(info) << "Creating AMQP Channel...";
-
-		auto channel = AmqpClient::Channel::Create(amqp_connector.AMQP_HOST,
-												   amqp_connector.AMQP_PORT,
-												   amqp_connector.AMQP_USER,
-												   amqp_connector.AMQP_PWD,
-												   amqp_connector.AMQP_VHOST);
-		BOOST_LOG_TRIVIAL(info) << "Channel created successfully!";
-
-		BOOST_LOG_TRIVIAL(info) << "Connecting Consumer to AMQP...";
-
-		auto consumer_tag = channel->BasicConsume(amqp_connector.AMQP_QUEUE, "", true, false, false, 1);
-		BOOST_LOG_TRIVIAL(info) << "Consumer connected successfully!";
-
-		return {channel, consumer_tag};
-	}
-
-	void send_results(string &task_id, json &message)
-	{
-		BOOST_LOG_TRIVIAL(info) << "Sending results for task: " << task_id << " to redis" << std::endl;
-		try
-		{
-			this->redis.set(task_id, message.dump());
-			BOOST_LOG_TRIVIAL(info) << "Results for task: " << task_id << " sent successfully" << std::endl;
-		}
-		catch (const Error &e)
-		{
-			// log error
-			BOOST_LOG_TRIVIAL(error) << "Error sending results: " << e.what();
-		}
-	}
-	void generate_mesh_elements(FemStdMesh &fem, Mesh mesh)
+	static void generate_mesh_elements(FemStdMesh &fem, const Mesh &mesh)
 	{
 		const char *mesh_type = mesh.num_dims == 2 ? "mesh2D" : "mesh3D";
-		int ix1[mesh.nodes_per_element * mesh.num_elements];
-		int *connectivities = VectorHelpers::flatten(mesh.connectivities).data();
-		// fill ix1 with the data from connectivities
-		for (size_t i = 0; i < mesh.nodes_per_element * mesh.num_elements; i++)
-		{
-			ix1[i] = connectivities[i];
-			cout << "Ix: " << ix1[i] << "Connectivity: " << connectivities[i] << endl;
-		}
-		double *coordinates = VectorHelpers::flatten(mesh.coordinates).data();
-		cout << "Generating mesh elements..." << endl;
+		std::vector<int> flattened_connectivities = VectorHelpers::flatten(mesh.connectivities);
+		int *connectivities = flattened_connectivities.data();
+
+		std::vector<double> flattened_coordinates = VectorHelpers::flatten(mesh.coordinates);
+		double *coordinates = flattened_coordinates.data();
 		try
 		{
-			cout << "Nen: " << mesh.nodes_per_element << endl;
-			for (size_t e = 0; e < mesh.num_elements; e++)
-				fem.generateElement(mesh_type, ix1 + e * (mesh.nodes_per_element), mesh.nodes_per_element - 1);
+			for (int e = 0; e < mesh.num_elements; e++)
+				fem.generateElement(mesh_type, connectivities + e * (mesh.nodes_per_element), mesh.nodes_per_element - 1);
 		}
 		catch (const std::exception &e)
 		{
 			BOOST_LOG_TRIVIAL(error) << "Error generating mesh elements: " << e.what();
 		}
-		cout << "Mesh elements generated successfully!" << endl;
-		cout << "Generating mesh nodes..." << endl;
-		fem.x.setDim(mesh.num_dims * mesh.nodes_per_element);
-		cout << "Mesh nodes generated successfully!" << endl;
+		fem.x.setDim(mesh.num_dims * mesh.num_nodes);
 		// set coordinates
-		cout << "Setting coordinates..." << endl;
 		for (size_t n = 0; n < sizeof(coordinates); n++)
 			fem.x[n] = coordinates[n];
-		cout << "Coordinates set successfully!" << endl;
 		// perform splitting
 		cout << "Performing splitting..." << endl;
 		// mesh.print(mesh.splitting);
@@ -316,7 +264,7 @@ public:
 			generate_mesh_elements(fem, mesh);
 
 			// TODO: if success send results and acknowledge message
-			json payload = {
+			json data = {
 				{"task_id", task_id},
 				{"status", MessageStatus[SUCCESS]},
 				{"payload", "hi"}
@@ -324,7 +272,7 @@ public:
 			};
 			ack_message(envelope);
 
-			send_results(task_id, payload);
+			send_results(task_id, data);
 		}
 		else if (!task_id.empty() && !parsed)
 		{
@@ -402,7 +350,7 @@ public:
 			auto message = envelope->Message();
 			auto body = json::parse(message->Body());
 			// TODO: convert body to Mesh Struct
-			string task_id = "";
+			string task_id;
 			json payload;
 			try
 			{
