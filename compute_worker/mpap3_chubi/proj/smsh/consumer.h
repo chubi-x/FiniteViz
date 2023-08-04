@@ -191,7 +191,7 @@ private:
 					else if (memberName == "connectivities")
 						mesh.set_properties(propertyValue, memberName, mesh.connectivities, &mesh.num_elements, &mesh.nodes_per_element);
 					else if (memberName == "splitting")
-						mesh.set_properties(propertyValue, memberName, mesh.splitting, 0, 0);
+						mesh.set_properties(propertyValue, memberName, mesh.splitting, nullptr, nullptr);
 					else
 					{
 						valid_json = false;
