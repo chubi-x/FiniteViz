@@ -1,6 +1,7 @@
 dev
 ext
-lib
+lib/*/*
+!lib/other/MyOutputStream.h
 Makefile
 proj/smsh/*
 !proj/smsh/consumer.h

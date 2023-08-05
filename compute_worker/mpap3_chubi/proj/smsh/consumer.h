@@ -1,5 +1,6 @@
-#define BOOST_LOG_DYN_LINK
-// #define BOOST_ALL_DYN_LINK
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "cppcoreguidelines-pro-type-member-init"
+#define BOOST_LOG_DYN_LINK 1
 #include <iostream>
 #include <signal.h>
 #include <bits/stdc++.h>
@@ -8,6 +9,7 @@
 #include <SimpleAmqpClient/SimpleAmqpClient.h>
 #include <nlohmann/json.hpp>
 #include "FemStdMesh.h"
+#include "MyOutputStream.h"
 
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
@@ -29,7 +31,8 @@ void init_logging()
 	logging::add_file_log(
 		keywords::file_name = "worker.log",
 		keywords::auto_flush = true, // TODO: ONLY FOR DEBUGGING
-		keywords::format = "[%TimeStamp%] [%ThreadID%] [%Severity%] %Message%");
+		keywords::format = "[%TimeStamp%] [%ThreadID%] [%Severity%] %Message%",
+		keywords::open_mode = std::ios_base::app);
 
 	// logging::core::get()->set_filter(
 	//     logging::trivial::severity >= logging::trivial::info);
@@ -227,46 +230,76 @@ private:
 			for (int e = 0; e < mesh.num_elements; e++)
 				fem.generateElement(mesh_type, connectivities + e * (mesh.nodes_per_element), mesh.nodes_per_element - 1);
 		}
-		catch (const std::exception &e)
+		catch (const MosException &e)
 		{
+			cout << "Mesh element error: \n"
+				 << e.what() << endl;
 			BOOST_LOG_TRIVIAL(error) << "Error generating mesh elements: " << e.what();
+			return; // TODO:
 		}
-		fem.x.setDim(mesh.num_dims * mesh.num_nodes);
+		try
+		{
+			fem.x.setDim(mesh.num_dims * mesh.num_nodes);
+		}
+		catch (const MosException &e)
+		{
+			cout << e.what() << endl;
+			BOOST_LOG_TRIVIAL(error) << "Error setting dimensions: " << e.what();
+			// TODO:
+		}
 		// set coordinates
-		for (size_t n = 0; n < sizeof(coordinates); n++)
-			fem.x[n] = coordinates[n];
+		try
+		{
+			for (size_t n = 0; n < sizeof(coordinates); n++)
+				fem.x[n] = coordinates[n];
+		}
+		catch (const MosException &e)
+		{
+			cout << e.what() << endl;
+			BOOST_LOG_TRIVIAL(error) << "Error setting coordinates: " << e.what();
+			// TODO:
+		}
 		// perform splitting
 		cout << "Performing splitting..." << endl;
 		// mesh.print(mesh.splitting);
-		for (const auto &node : mesh.splitting)
+		try
 		{
-			cout << "Node: " << node[0] << " " << node[1] << " " << node[2] << endl;
-			fem.split(node[0], node[1], node[2]);
+			for (const auto &node : mesh.splitting)
+			{
+				cout << "Node: " << node[0] << " " << node[1] << " " << node[2] << endl;
+				fem.split(node[0], node[1], node[2]);
+			}
 		}
-
+		catch (const MosException &e)
+		{
+			cout << e.what() << endl;
+			BOOST_LOG_TRIVIAL(error) << "Error performing splitting: " << e.what();
+			// TODO:
+		}
+		// set mesh.connectivities to fem.ix
 		cout << "Splitting performed successfully!" << endl;
 		cout << "Writing mesh to file..." << endl;
 		fem.writeMeshToFile("finiteViz.mesh");
-		cout << "Mesh written to file successfully!" << endl;
+		cout << "BaseMesh written to file successfully!" << endl;
 	}
 	/// @brief Process message from AMQP
 	/// @param task_id
 	/// @param payload
 	/// @param envelope
-	void process_message(string &task_id, json &payload, const AmqpClient::Envelope::ptr_t &envelope)
+	TaskResponse process_message(string &task_id, json &payload, const AmqpClient::Envelope::ptr_t &envelope)
 	{
-		Mesh mesh;
-		bool parsed = parseJsonToMesh(mesh, task_id, payload);
+		BaseMesh mesh;
+		ParseResult parsed = parseJsonToMesh(mesh, task_id, payload);
 		// update memory store
-		if (!task_id.empty() && parsed)
+		if (!task_id.empty() && parsed.is_valid)
 		{
 			FemStdMesh fem("mesh", mesh.num_dims);
-			generate_mesh_elements(fem, mesh);
+			generate_mesh(fem, mesh);
 
 			// TODO: if success send results and acknowledge message
 			json data = {
 				{"task_id", task_id},
-				{"status", MessageStatus[SUCCESS]},
+				{"status", TaskStatus[SUCCESS]},
 				{"payload", "hi"}
 
 			};
