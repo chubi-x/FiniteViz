@@ -2,7 +2,9 @@
     "configurations": [
         {
             "name": "Linux",
-            "includePath": [],
+            "includePath": [
+                "${workspaceFolder}/compute_worker/mpap3_chubi/**"
+            ],
             "defines": [],
             "compilerPath": "/usr/bin/g++",
             "cStandard": "c17",

@@ -3,13 +3,18 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/src/mpap3_chubi/lib/**",
+                "${workspaceFolder}/src/mpap3_chubi/dev/**",
+                "${workspaceFolder}/src/mpap3_chubi/ext/**",
+                "${workspaceFolder}/src/mpap3_chubi/lib/groups"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/gcc",
+            "compilerPath": "/usr/bin/g++",
             "cStandard": "c17",
             "cppStandard": "gnu++17",
-            "intelliSenseMode": "linux-gcc-x64"
+            "intelliSenseMode": "linux-gcc-x64",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
         }
     ],
     "version": 4
