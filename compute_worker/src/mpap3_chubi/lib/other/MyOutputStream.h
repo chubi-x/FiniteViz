@@ -40,8 +40,8 @@ class MosException : public std::exception
 {
 public:
   // Constructor to initialize the exception message
-  MosException(string msg) : message(msg) {}
-  const char *what() const noexcept override
+  explicit MosException(string msg) : message(msg) {}
+  [[nodiscard]] const char *what() const noexcept override
   {
     return message.c_str();
   }
@@ -566,9 +566,9 @@ void MyOutputStream::error(const char *strg1, Type &a, const char *strg2)
 
   case mos_webpage:
   {
-    std::cout << "\nError: " << strg1 << a << strg2 << "\n\n";
     std::stringstream ss;
     ss << strg1 << a << strg2;
+    // std::cout << "\nError(from stream): " << ss.str() << "\n\n";
     throw MosException(ss.str());
   }
     // std::cout << "Content-type:application/json\r\n\r\n\"Error: "
