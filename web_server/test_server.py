@@ -29,7 +29,7 @@ app.logger.addHandler(handler)
 publisher = MessagePublisher()
 
 
-@app.route("/message", methods=["POST"])
+@app.post("/message")
 def message():
     task_id = str(uuid.uuid4())
     payload = request.get_json()
