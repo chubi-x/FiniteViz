@@ -303,7 +303,6 @@ private:
         int *elements = flattened_elements->data();
         std::unique_ptr<std::vector<double>> flattened_coordinates = VectorHelpers::flatten(mesh.coordinates);
         double *coordinates = flattened_coordinates->data();
-
         try
         {
             cout << "generating elements..." << endl;
@@ -347,11 +346,7 @@ private:
             cout << "splitting..." << endl;
 
             for (const auto &node : mesh.splitting)
-            {
-                split_error_nodes =
-                    "Nodes: " + to_string(node[0]) + ", " + to_string(node[1]) + ", and " + to_string(node[2]);
                 fem.split(node[0], node[1], node[2]);
-            }
         }
         catch (const MosException &e)
         {
@@ -359,6 +354,8 @@ private:
             return std::move(mesh_generation_error(("Error splitting " + split_error_nodes).c_str()));
         }
         std::unique_ptr<NewFemMesh> new_mesh_results = std::move(fem.writeMeshToVector());
+        // print out output
+//        fem.writeMeshToFile("mine.mesh");
         std::unique_ptr<NewMesh> new_mesh = std::make_unique<NewMesh>();
         new_mesh->coordinates = std::move(new_mesh_results->coordinates);
         new_mesh->elements = std::move(new_mesh_results->elements);
