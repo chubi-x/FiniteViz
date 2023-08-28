@@ -27,7 +27,6 @@ RABBIT_HOST = "172.17.0.3"
 
 
 class MessagePublisher:
-    MESSAGE_CANCELED = False
     _channel = None
     _connection = None
 
