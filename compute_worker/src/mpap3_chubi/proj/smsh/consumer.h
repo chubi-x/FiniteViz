@@ -320,7 +320,7 @@ private:
         {
             cout << "setting dimensions..." << endl;
 
-            fem.x.setDim(mesh.num_dims * mesh.num_nodes);
+            fem.x.setDim(static_cast<int>(mesh.num_dims) * mesh.num_nodes); //casting is not a problem since num_dims is always either 2 or 3
         }
         catch (const MosException &e)
         {
