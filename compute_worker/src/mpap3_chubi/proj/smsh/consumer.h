@@ -331,7 +331,7 @@ private:
         try
         {
             cout << "setting coordinates..." << endl;
-            for (size_t n = 0; n < sizeof(coordinates); n++)
+            for (int n = 0; n < flattened_coordinates->size(); n++)
                 fem.x[n] = coordinates[n];
         }
         // TODO: print fem.x
