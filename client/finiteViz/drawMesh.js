@@ -30,9 +30,10 @@ export default function visualise() {
 
   const fontLoader = new FontLoader();
   fontLoader.load("fonts/helvetica.json", (font) => {
-    const pointGeometry = new THREE.SphereGeometry(0.05);
+    const pointGeometry = new THREE.SphereGeometry(0.03);
     const pointMaterial = new THREE.MeshBasicMaterial({ color: "white" });
     const textMaterial = new THREE.MeshBasicMaterial({ color: "pink" });
+
     coordinates.forEach((coord, node) => {
       const [x, y] = coord;
       const point = new THREE.Mesh(pointGeometry, pointMaterial);
@@ -47,18 +48,29 @@ export default function visualise() {
       textMesh.position.set(x - 0.01, y - 0.3, 0);
       scene.add(textMesh);
     });
-  });
-
-  //draw line between points to specify elements
-  elements.forEach((el) => {
-    let points = [];
-    for (let i = 0; i < el.length - 1; i++) {
-      points.push(coordinates.filter((coord, node) => node === el[i]).map(([x, y], index) => new THREE.Vector2(x, y)));
-    }
-    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });
-    const geometry = new THREE.BufferGeometry().setFromPoints(points.flat());
-    const line = new THREE.LineLoop(geometry, lineMaterial);
-    scene.add(line);
+    //draw line between points to specify elements
+    elements.forEach((el, elIndex) => {
+      const points = [];
+      for (let i = 0; i < el.length - 1; i++) {
+        points.push(coordinates.filter((coord, node) => node === el[i]).map(([x, y]) => new THREE.Vector2(x, y)));
+      }
+      const lineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });
+      const geometry = new THREE.BufferGeometry().setFromPoints(points.flat());
+      geometry.computeBoundingBox(); //compute bounding box
+      const center = new THREE.Vector2();
+      geometry.boundingBox.getCenter(center);
+      //label element face
+      const textGeometry = new TextGeometry(`El ${elIndex}`, {
+        font,
+        size: 0.1,
+        height: 0.02
+      });
+      const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+      textMesh.position.set(center.x - 0.05, center.y, 0);
+      scene.add(textMesh);
+      const line = new THREE.LineLoop(geometry, lineMaterial);
+      scene.add(line);
+    });
   });
 
   camera.position.z = 4;
