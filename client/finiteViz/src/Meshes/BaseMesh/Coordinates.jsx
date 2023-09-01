@@ -1,12 +1,11 @@
-// import { useState } from 'react'
+import { useState } from 'react'
 export default function Coordinates ({ coordinatesState, numDims, numNodes, showElements, children }) {
   const { coordinates, setCoordinates } = coordinatesState
+  const [coordinatesComplete, setCoordinatesComplete] = useState(false)
 
-  const checkCoordinatesComplete = () => {
-    return coordinates.every((node) => node.every((coord) => coord !== ''))
-  }
   function defineElements () {
     showElements(true)
+    setCoordinatesComplete(coordinates.every((node) => node.every((coord) => coord !== '')))
   }
   function setCoordinate (i, j, value) {
     setCoordinates((prevCoordinates) => {
@@ -49,7 +48,7 @@ export default function Coordinates ({ coordinatesState, numDims, numNodes, show
             </div>
           ))}
         </div>
-        <button disabled={!checkCoordinatesComplete()} onClick={defineElements} type='button' className='bg-blue-300 p-2 rounded-md'>
+        <button disabled={coordinatesComplete} onClick={defineElements} type='button' className='bg-blue-300 p-2 rounded-md'>
           Define Element Nodes
         </button>
       </form>

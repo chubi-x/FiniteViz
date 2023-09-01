@@ -13,10 +13,13 @@ export function BaseMesh () {
   const [showElements, setShowElements] = useState(false)
   const [showSplits, setShowSplits] = useState(false)
   const [showBaseMesh, setShowBaseMesh] = useState(false)
-  const [textColor, setTextColor] = useState('yellow')
 
-  const initialCoordinates = Array.from({ length: numNodes }, () => new Array(numDims < 3 ? 2 : 3).fill(''))
+  const initialCoordinates = Array.from({ length: numNodes }, () =>
+    new Array(numDims < 3 ? 2 : 3).fill('')
+  )
   const [useDefaultCoordinates] = useState(true)
+  const useDefaultElements = true
+
   const defaultCoordinates = [
     [0.0, 0.0],
     [1.0, 0.0],
@@ -26,26 +29,40 @@ export function BaseMesh () {
     [2.0, 2.0],
     [0.0, 2.0]
   ]
-  const [coordinates, setCoordinates] = useState(useDefaultCoordinates ? defaultCoordinates : initialCoordinates)
+  const [coordinates, setCoordinates] = useState(
+    useDefaultCoordinates ? defaultCoordinates : initialCoordinates
+  )
   const defaultElements = [
     [0, 1, 2, 3, 1],
     [1, 4, 5, 2, 1],
     [3, 2, 5, 6, 1]
   ]
-  const useDefaultElements = true
-  const initialElements = Array.from({ length: numElements }, () => new Array(nodesPerElement).fill(''))
-  const [elements, setElements] = useState(useDefaultElements ? defaultElements : initialElements)
+  const initialElements = Array.from({ length: numElements }, () =>
+    new Array(nodesPerElement).fill('')
+  )
+  const [elements, setElements] = useState(
+    useDefaultElements ? defaultElements : initialElements
+  )
 
   return (
     <>
       <MeshProps
         dims={{ numDims, setNumDims }}
         elements={{ numElements, setNumElements }}
-        nodes={{ nodesPerElement, setNodesPerElement, setShowCoordinates, setNumNodes }}
+        nodes={{
+          nodesPerElement,
+          setNodesPerElement,
+          setShowCoordinates,
+          setNumNodes
+        }}
       >
-        <input value={textColor} onChange={(e) => setTextColor(e.target.value)} />
         {showCoordinates && (
-          <Coordinates coordinatesState={{ coordinates, setCoordinates }} showElements={setShowElements} numDims={numDims} numNodes={numNodes}>
+          <Coordinates
+            coordinatesState={{ coordinates, setCoordinates }}
+            showElements={setShowElements}
+            numDims={numDims}
+            numNodes={numNodes}
+          >
             {showElements && (
               <Elements
                 elementsState={{ elements, setElements, useDefaultElements }}
@@ -59,7 +76,7 @@ export function BaseMesh () {
             )}
           </Coordinates>
         )}
-        {showBaseMesh && <Viz elements={elements} coordinates={coordinates} textColor={textColor} />}
+        {showBaseMesh && <Viz elements={elements} coordinates={coordinates} />}
       </MeshProps>
     </>
   )

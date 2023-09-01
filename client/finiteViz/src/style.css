@@ -16,11 +16,7 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 }
-#baseMesh {
+#app {
+  @apply h-screen;
   @apply w-11/12 mx-auto flex flex-col items-center space-y-6;
 }
-#app {
-  width: 600px;
-  height: 600px;
-}
-

@@ -1,10 +1,9 @@
-import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BaseMesh } from './BaseMesh'
 import './style.css'
+import App from './App'
 
-ReactDOM.createRoot(document.getElementById('baseMesh')).render(
+ReactDOM.createRoot(document.getElementById('app')).render(
   // <React.StrictMode>
-  <BaseMesh />
+  <App />
   //  </React.StrictMode>
 )

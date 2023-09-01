@@ -1,9 +1,9 @@
 import * as THREE from 'three'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
-export default function Viz ({ coordinates, elements, textColor }) {
+export default function Viz ({ coordinates, elements }) {
   const refContainer = useRef()
   // const [renderer, setRenderer] = useState()
   useEffect(() => {
@@ -22,7 +22,7 @@ export default function Viz ({ coordinates, elements, textColor }) {
       const pointGeometry = new THREE.SphereGeometry(0.03)
       const pointMaterial = new THREE.MeshBasicMaterial({ color: 'white' })
 
-      const textMaterial = new THREE.MeshBasicMaterial({ color: textColor })
+      const textMaterial = new THREE.MeshBasicMaterial({ color: 'pink' })
       // console.log(textMaterial)
       coordinates.forEach((coord, node) => {
         const [x, y] = coord
@@ -42,10 +42,11 @@ export default function Viz ({ coordinates, elements, textColor }) {
       elements.forEach((el, elIndex) => {
         const points = []
         for (let i = 0; i < el.length - 1; i++) {
-          points.push(coordinates.filter((coord, node) => node === el[i]).map(([x, y]) => new THREE.Vector2(x, y)))
+          coordinates.filter((coord, node) => node === el[i])
+            .forEach(([x, y]) => points.push(new THREE.Vector2(x, y)))
         }
-        const lineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff })
-        const geometry = new THREE.BufferGeometry().setFromPoints(points.flat())
+        const lineMaterial = new THREE.LineBasicMaterial({ color: 'green' })
+        const geometry = new THREE.BufferGeometry().setFromPoints(points)
         geometry.computeBoundingBox() // compute bounding box
         const center = new THREE.Vector3()
         geometry.boundingBox.getCenter(center)
@@ -66,15 +67,15 @@ export default function Viz ({ coordinates, elements, textColor }) {
     camera.position.z = 4
     let req = null
     const animate = () => {
-      req = requestAnimationFrame(animate)
+      req = window.requestAnimationFrame(animate)
       renderer.render(scene, camera)
     }
     animate()
     return () => {
-      cancelAnimationFrame(req)
+      window.cancelAnimationFrame(req)
       renderer.dispose()
     }
     // }
-  }, [coordinates, elements, textColor])
+  }, [coordinates, elements])
   return <div style={{ height: '500px', width: '500px' }} ref={refContainer} />
 }
