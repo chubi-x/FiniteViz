@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import MeshProps from './MeshProps'
 import Coordinates from './Coordinates'
 import Elements from './Elements'
@@ -14,48 +14,24 @@ export function BaseMesh () {
   const [showSplits, setShowSplits] = useState(false)
   const [showBaseMesh, setShowBaseMesh] = useState(false)
 
-  const initialCoordinates = Array.from({ length: numNodes }, () =>
-    new Array(numDims < 3 ? 2 : 3).fill('')
-  )
-  const [useDefaultCoordinates] = useState(true)
-  const useDefaultElements = true
+  const [coordinates, setCoordinates] = useState([])
 
-  const defaultCoordinates = [
-    [0.0, 0.0],
-    [1.0, 0.0],
-    [1.0, 1.0],
-    [0.0, 1.0],
-    [2.0, 0.0],
-    [2.0, 2.0],
-    [0.0, 2.0]
-  ]
-  const [coordinates, setCoordinates] = useState(
-    useDefaultCoordinates ? defaultCoordinates : initialCoordinates
-  )
-  const defaultElements = [
-    [0, 1, 2, 3, 1],
-    [1, 4, 5, 2, 1],
-    [3, 2, 5, 6, 1]
-  ]
-  const initialElements = Array.from({ length: numElements }, () =>
-    new Array(nodesPerElement).fill('')
-  )
-  const [elements, setElements] = useState(
-    useDefaultElements ? defaultElements : initialElements
-  )
+  const [elements, setElements] = useState([])
+  const vizParent = useRef()
 
   return (
-    <>
-      <MeshProps
-        dims={{ numDims, setNumDims }}
-        elements={{ numElements, setNumElements }}
-        nodes={{
-          nodesPerElement,
-          setNodesPerElement,
-          setShowCoordinates,
-          setNumNodes
-        }}
-      >
+    <div className='w-full flex'>
+      <div className='w-1/2'>
+        <MeshProps
+          dims={{ numDims, setNumDims }}
+          elements={{ numElements, setNumElements }}
+          nodes={{
+            nodesPerElement,
+            setNodesPerElement,
+            setShowCoordinates,
+            setNumNodes
+          }}
+        />
         {showCoordinates && (
           <Coordinates
             coordinatesState={{ coordinates, setCoordinates }}
@@ -65,19 +41,27 @@ export function BaseMesh () {
           >
             {showElements && (
               <Elements
-                elementsState={{ elements, setElements, useDefaultElements }}
+                elementsState={{ elements, setElements }}
                 showSplits={setShowSplits}
                 vizBaseMesh={setShowBaseMesh}
                 numNodes={numNodes}
                 elementsProp={{ numElements, nodesPerElement }}
               >
-                {showSplits && <Splits />}
+                {showSplits && <Splits nodes={numNodes} />}
               </Elements>
             )}
           </Coordinates>
         )}
-        {showBaseMesh && <Viz elements={elements} coordinates={coordinates} />}
-      </MeshProps>
-    </>
+      </div>
+      <div className='w-1/2 h-full'>
+        {showBaseMesh && (
+          <Viz
+            elements={elements}
+            coordinates={coordinates}
+            parent={vizParent}
+          />
+        )}
+      </div>
+    </div>
   )
 }
