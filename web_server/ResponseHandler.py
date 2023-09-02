@@ -13,7 +13,11 @@ DEFAULT_MESSAGES = dict(
     task_failure="Task failed.",
     empty_task="Empty Task",
 )
-
+HEADERS = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+}
 
 DEFAULT_SERVER_ERROR_STATUS_CODE = 500
 DEFAULT_CLIENT_ERROR_STATUS_CODE = 400
@@ -67,6 +71,7 @@ def server_error(
         error_response_object(False, message or DEFAULT_MESSAGES["server_error"]),
         status=status,
         mimetype="application/json",
+        headers=HEADERS,
     )
 
 
@@ -84,6 +89,7 @@ def client_error(message: str, status=DEFAULT_CLIENT_ERROR_STATUS_CODE) -> Respo
         error_response_object(False, message),
         status=status,
         mimetype="application/json",
+        headers=HEADERS,
     )
 
 
@@ -108,6 +114,7 @@ def task_creation_success(
         ),
         status=status,
         mimetype="application/json",
+        headers=HEADERS,
     )
 
 
@@ -129,6 +136,7 @@ def empty_task(
         __task_response_object(False, message, MESSAGE_STATUS.EMPTY.value, meta, None),
         status=status,
         mimetype="application/json",
+        headers=HEADERS,
     )
 
 
@@ -153,6 +161,7 @@ def task_creation_error(
         ),
         status=status,
         mimetype="application/json",
+        headers=HEADERS,
     )
 
 
@@ -177,6 +186,7 @@ def task_success(
         ),
         status=status,
         mimetype="application/json",
+        headers=HEADERS,
     )
 
 
@@ -201,6 +211,7 @@ def task_processing(
         ),
         status=status,
         mimetype="application/json",
+        headers=HEADERS,
     )
 
 
@@ -225,6 +236,7 @@ def task_failed(
         ),
         status=status,
         mimetype="application/json",
+        headers=HEADERS,
     )
 
 
@@ -252,4 +264,5 @@ def task_failed(
 #         response_object,
 #         status=status,
 #         mimetype="application/json",
+headers = ({"Access-Control-Allow-Origin": "*"},)
 #     )

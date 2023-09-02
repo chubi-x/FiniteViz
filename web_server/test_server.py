@@ -1,4 +1,5 @@
 from flask import Flask, request
+from flask_cors import CORS
 import redis
 import uuid
 import json
@@ -22,6 +23,7 @@ redis_store = redis.Redis(connection_pool=pool, decode_responses=True)
 
 payload_keys = ["elements", "splitting", "coordinates"]
 app = Flask(__name__)
+CORS(app)
 app.logger.setLevel(logging.DEBUG)
 handler = logging.StreamHandler(stream=sys.stdout)
 app.logger.addHandler(handler)
@@ -117,4 +119,4 @@ def poll(id: str):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=3000)
