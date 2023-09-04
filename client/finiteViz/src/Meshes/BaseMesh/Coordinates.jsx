@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { NumericFormat } from 'react-number-format'
 export default function Coordinates ({
   state,
   numDims,
@@ -51,28 +52,22 @@ export default function Coordinates ({
     for (let i = 0; i < numNodes; i++) {
       const node = {}
       node.x = (
-        <input
-          className='x-coords'
-          pattern='/^-?[0-9]*$/'
-          onChange={e => setCoordinate(i, 0, parseInt(e.target.value))}
+        <NumericFormat
           value={coordinates[i][0]}
+          onChange={e => setCoordinate(i, 0, parseInt(e.target.value))}
         />
       )
       node.y = (
-        <input
-          className='y-coords'
-          pattern='/^-?[0-9]*$/'
-          onChange={e => setCoordinate(i, 1, parseInt(e.target.value))}
+        <NumericFormat
           value={coordinates[i][1]}
+          onChange={e => setCoordinate(i, 0, parseInt(e.target.value))}
         />
       )
       if (numDims > 2) {
         node.z = (
-          <input
-            className='z-coords'
-            pattern='/^-?[0-9]*$/'
-            onChange={e => setCoordinate(i, 2, parseInt(e.target.value))}
+          <NumericFormat
             value={coordinates[i][2]}
+            onChange={e => setCoordinate(i, 0, parseInt(e.target.value))}
           />
         )
       }
