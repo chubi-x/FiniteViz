@@ -1,21 +1,19 @@
 import { useEffect } from 'react'
-export default function Elements ({
-  elementsState,
-  elementsProp,
-  numNodes,
-  showSplits,
-  vizBaseMesh,
-  children
-}) {
-  const { elements, setElements } = elementsState
+export default function Elements ({ state, numNodes, showSplits, vizBaseMesh }) {
+  // const { elements, setElements } = elementsState
+  const { elements, baseMeshDispatch, nodesPerElement, numElements } = state
   const useDefaultElements = true
 
   useEffect(
-    () => setElements(useDefaultElements ? defaultElements : initialElements),
+    () =>
+      // setElements(useDefaultElements ? defaultElements : initialElements)
+      baseMeshDispatch({
+        type: 'elements',
+        payload: useDefaultElements ? defaultElements : initialElements
+      }),
     []
   )
 
-  const { nodesPerElement, numElements } = elementsProp
   const defaultElements = [
     [0, 1, 2, 3, 1],
     [1, 4, 5, 2, 1],
@@ -29,8 +27,16 @@ export default function Elements ({
     return elements.every(el => el.every(node => node !== ''))
   }
   function updateElements (i, j, value) {
-    setElements(prev => {
-      return prev.map((row, rowIndex) =>
+    // setElements(prev => {
+    //   return prev.map((row, rowIndex) =>
+    //     rowIndex === i
+    //       ? [...row.slice(0, j), parseInt(value), ...row.slice(j + 1)]
+    //       : row
+    //   )
+    // })
+    baseMeshDispatch({
+      type: 'elements',
+      payload: elements.map((row, rowIndex) =>
         rowIndex === i
           ? [...row.slice(0, j), parseInt(value), ...row.slice(j + 1)]
           : row
@@ -113,7 +119,6 @@ export default function Elements ({
           </button>
         </div>
       </form>
-      {children}
     </>
   )
 }

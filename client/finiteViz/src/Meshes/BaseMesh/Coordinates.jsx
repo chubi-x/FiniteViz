@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 export default function Coordinates ({
-  coordinatesState,
+  state,
   numDims,
   numNodes,
   showElements,
   children
 }) {
-  const { coordinates, setCoordinates } = coordinatesState
+  // const { coordinates, setCoordinates } = coordinatesState
+  const { coordinates, baseMeshDispatch } = state
   // const [coordinatesComplete, setCoordinatesComplete] = useState(false)
   const initialCoordinates = Array.from({ length: numNodes }, () =>
     new Array(numDims < 3 ? 2 : 3).fill('')
@@ -25,26 +26,22 @@ export default function Coordinates ({
 
   useEffect(
     () =>
-      setCoordinates(
-        useDefaultCoordinates ? defaultCoordinates : initialCoordinates
-      ),
+      baseMeshDispatch({
+        type: 'coordinates',
+        payload: useDefaultCoordinates ? defaultCoordinates : initialCoordinates
+      }),
     []
   )
-  // console.log(numNodes, coordinates)
   const checkCoordinatesComplete = () =>
     coordinates.every(node => node.every(coord => coord !== ''))
-
-  // console.log(checkCoordinatesComplete())
   function defineElements () {
     showElements(true)
-    // setCoordinatesComplete(
-    //   coordinates.every(node => node.every(coord => coord !== ''))
-    // )
   }
   function setCoordinate (i, j, value) {
-    setCoordinates(prevCoordinates => {
-      const val = value === '' || isNaN(value) ? '' : value
-      return prevCoordinates.map((row, rowIndex) =>
+    const val = value === '' || isNaN(value) ? '' : value
+    baseMeshDispatch({
+      type: 'coordinates',
+      payload: coordinates.map((row, rowIndex) =>
         rowIndex === i ? [...row.slice(0, j), val, ...row.slice(j + 1)] : row
       )
     })
@@ -56,7 +53,7 @@ export default function Coordinates ({
       node.x = (
         <input
           className='x-coords'
-          pattern='/^[0-9]*$/'
+          pattern='/^-?[0-9]*$/'
           onChange={e => setCoordinate(i, 0, parseInt(e.target.value))}
           value={coordinates[i][0]}
         />
@@ -64,7 +61,7 @@ export default function Coordinates ({
       node.y = (
         <input
           className='y-coords'
-          pattern='/^[0-9]*$/'
+          pattern='/^-?[0-9]*$/'
           onChange={e => setCoordinate(i, 1, parseInt(e.target.value))}
           value={coordinates[i][1]}
         />
@@ -73,7 +70,7 @@ export default function Coordinates ({
         node.z = (
           <input
             className='z-coords'
-            pattern='/^[0-9]*$/'
+            pattern='/^-?[0-9]*$/'
             onChange={e => setCoordinate(i, 2, parseInt(e.target.value))}
             value={coordinates[i][2]}
           />

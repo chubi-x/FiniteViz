@@ -1,29 +1,40 @@
 import { useState } from 'react'
-export default function Splits ({ nodes }) {
+export default function Splits ({ nodes, state, generateMesh }) {
+  const { splitting, baseMeshDispatch } = state
   const defaultSplits = [
     [0, 1, 2],
     [0, 3, 2],
     [1, 4, 2]
   ]
-  const [splits, setSplits] = useState([])
   const [newSplit, setNewSplit] = useState(['', '', ''])
+  const splitsComplete = () =>
+    splitting.length > 0 &&
+    splitting.every(split => split.every(cell => cell !== ''))
   function addSplits () {
     const newSplitComplete = newSplit.every(cell => cell !== '')
     if (newSplitComplete) {
-      // if (splits.length === 0) {
-      setSplits(prev => [...prev, newSplit])
+      // if (splitting.length === 0) {
+      baseMeshDispatch({ type: 'splitting', payload: [...splitting, newSplit] })
       setNewSplit(['', '', ''])
       // } else console.log('greater')
-    } else window.alert('Enter the first set of splits!')
+    } else window.alert('Enter the first set of splitting!')
   }
 
+  async function checkSplits () {
+    if (splitsComplete()) {
+      await generateMesh()
+    }
+  }
   function populateNodes () {
     const nodesArray = []
     for (let i = 0; i < nodes; i++) nodesArray.push(i)
     return nodesArray
   }
   function removeSplit (index) {
-    setSplits(prev => prev.filter((_, rowIndex) => index !== rowIndex))
+    baseMeshDispatch({
+      type: 'splitting',
+      payload: splitting.filter((_, rowIndex) => index !== rowIndex)
+    })
   }
   function updatenewSplit (e, cell) {
     let cellIndex
@@ -38,7 +49,7 @@ export default function Splits ({ nodes }) {
       })
     )
   }
-  console.log(splits)
+  // console.log(splitting)
   function printNodes () {
     return populateNodes().map((option, index) => (
       <option value={option} key={index}>
@@ -47,10 +58,10 @@ export default function Splits ({ nodes }) {
     ))
   }
   return (
-    <form id='splits' className='my-10'>
+    <form id='splitting' className='my-10'>
       <div className='my-6'>
-        {splits.length > 0 &&
-          splits.map((split, index) => (
+        {splitting.length > 0 &&
+          splitting.map((split, index) => (
             <div key={index} className='flex space-x-6 bg-red-400'>
               <div className='inline-block'>Node 1 : {split[0]} </div>
 
@@ -110,7 +121,12 @@ export default function Splits ({ nodes }) {
         </button>
       </div>
       <div>
-        <button id='' type='button' className='bg-blue-300 p-2 rounded-md'>
+        <button
+          onClick={checkSplits}
+          id=''
+          type='button'
+          className='bg-blue-300 p-2 rounded-md'
+        >
           Generate Mesh
         </button>
       </div>
