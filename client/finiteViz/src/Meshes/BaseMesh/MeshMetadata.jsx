@@ -1,5 +1,5 @@
 import { useState } from 'react'
-export default function MeshProps ({ dims, elements, nodes, children }) {
+export default function MeshMetadata ({ dims, elements, nodes, children }) {
   const { numDims, setNumDims } = dims
   const { numElements, setNumElements } = elements
   const {

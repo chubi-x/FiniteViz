@@ -2,7 +2,7 @@ import Tabs from './views/Tabs'
 import { OutputMesh } from './Meshes/OutputMesh/OutputMesh'
 import { BaseMesh } from './Meshes/BaseMesh'
 import { useReducer, useState } from 'react'
-import { meshReducer } from './reducers/meshReducer'
+import { activeMeshPropStateReducer, meshReducer } from './reducers/meshReducer'
 
 export default function App () {
   const [baseActive, setBaseActive] = useState(true)
@@ -11,6 +11,15 @@ export default function App () {
     elements: [],
     splitting: []
   })
+  const [activeMeshPropState, activeMeshPropStateDispatch] = useReducer(
+    activeMeshPropStateReducer,
+    {
+      showCoordinates: false,
+      showElements: false,
+      showBaseMesh: false,
+      showSplits: false
+    }
+  )
   const { coordinates, elements, splitting } = baseMesh
   const [newMesh, setNewMesh] = useState({})
 
@@ -35,7 +44,8 @@ export default function App () {
         <BaseMesh
           state={{
             baseMesh,
-            baseMeshDispatch
+            baseMeshDispatch,
+            activeProp: { activeMeshPropState, activeMeshPropStateDispatch }
           }}
           generateMesh={generateMesh}
         />
