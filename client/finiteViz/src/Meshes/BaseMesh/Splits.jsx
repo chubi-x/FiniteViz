@@ -10,8 +10,9 @@ export default function Splits ({ nodes, state, generateMesh }) {
   const splitsComplete = () =>
     splitting.length > 0 &&
     splitting.every(split => split.every(cell => cell !== ''))
+  const newSplitComplete = newSplit.every(cell => cell !== '')
+
   function addSplits () {
-    const newSplitComplete = newSplit.every(cell => cell !== '')
     if (newSplitComplete) {
       // if (splitting.length === 0) {
       baseMeshDispatch({ type: 'splitting', payload: [...splitting, newSplit] })
@@ -123,6 +124,7 @@ export default function Splits ({ nodes, state, generateMesh }) {
       <div>
         <button
           onClick={checkSplits}
+          disabled={!splitsComplete()}
           id=''
           type='button'
           className='bg-blue-300 p-2 rounded-md'

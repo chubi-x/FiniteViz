@@ -4,12 +4,9 @@ export default function Coordinates ({
   state,
   numDims,
   numNodes,
-  showElements,
-  children
+  showElements
 }) {
-  // const { coordinates, setCoordinates } = coordinatesState
   const { coordinates, baseMeshDispatch } = state
-  // const [coordinatesComplete, setCoordinatesComplete] = useState(false)
   const initialCoordinates = Array.from({ length: numNodes }, () =>
     new Array(numDims < 3 ? 2 : 3).fill('')
   )
@@ -25,14 +22,14 @@ export default function Coordinates ({
     [0.0, 2.0]
   ]
 
-  useEffect(
-    () =>
+  useEffect(() => {
+    if (coordinates.length === 0) {
       baseMeshDispatch({
         type: 'coordinates',
         payload: useDefaultCoordinates ? defaultCoordinates : initialCoordinates
-      }),
-    []
-  )
+      })
+    }
+  }, [])
   const checkCoordinatesComplete = () =>
     coordinates.every(node => node.every(coord => coord !== ''))
   function defineElements () {
@@ -49,30 +46,7 @@ export default function Coordinates ({
   }
   function makeCoordsInputs () {
     const nodes = []
-    for (let i = 0; i < numNodes; i++) {
-      const node = {}
-      node.x = (
-        <NumericFormat
-          value={coordinates[i][0]}
-          onChange={e => setCoordinate(i, 0, parseInt(e.target.value))}
-        />
-      )
-      node.y = (
-        <NumericFormat
-          value={coordinates[i][1]}
-          onChange={e => setCoordinate(i, 0, parseInt(e.target.value))}
-        />
-      )
-      if (numDims > 2) {
-        node.z = (
-          <NumericFormat
-            value={coordinates[i][2]}
-            onChange={e => setCoordinate(i, 0, parseInt(e.target.value))}
-          />
-        )
-      }
-      nodes.push(node)
-    }
+    for (let i = 0; i < numNodes; i++) nodes.push(i)
     return nodes
   }
 
@@ -81,18 +55,32 @@ export default function Coordinates ({
       <form id='coordinates'>
         <div>
           <h1>Nodes</h1>
-          {coordinates.length > 0 &&
-            makeCoordsInputs().map((coord, index) => (
-              <div className='node' key={index}>
-                {' '}
-                Node {index}:
-                <div>
-                  x: {coord.x}
-                  y: {coord.y}
-                  {coord?.z && <>z: {coord.z}</>}
+          <div className='space-y-3'>
+            {coordinates.length > 0 &&
+              makeCoordsInputs().map((node, index) => (
+                <div className='node' key={index}>
+                  x:{' '}
+                  <NumericFormat
+                    value={coordinates[node][0]}
+                    onChange={e => setCoordinate(node, 0, e.target.value)}
+                  />
+                  y:{' '}
+                  <NumericFormat
+                    value={coordinates[node][1]}
+                    onChange={e => setCoordinate(node, 1, e.target.value)}
+                  />
+                  {numDims > 2 && (
+                    <>
+                      z:{' '}
+                      <NumericFormat
+                        value={coordinates[node][2]}
+                        onChange={e => setCoordinate(node, 2, e.target.value)}
+                      />
+                    </>
+                  )}
                 </div>
-              </div>
-            ))}
+              ))}
+          </div>
         </div>
         <button
           disabled={!checkCoordinatesComplete()}
@@ -103,7 +91,6 @@ export default function Coordinates ({
           Define Element Nodes
         </button>
       </form>
-      {children}
     </>
   )
 }
