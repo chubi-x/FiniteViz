@@ -1,16 +1,14 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import MeshMetadata from './MeshMetadata'
 import Coordinates from './Coordinates'
 import Elements from './Elements'
 import Splits from './Splits'
 import Viz from './Viz'
 export function BaseMesh ({ state, generateMesh }) {
-  const [numDims, setNumDims] = useState(2)
-  const [numElements, setNumElements] = useState(3)
-  const [numNodes, setNumNodes] = useState(0)
-  const [nodesPerElement, setNodesPerElement] = useState(4)
+  const { baseMesh, baseMeshDispatch, activeProp, meshMetadata } = state
+  const { meshMetadataState, meshMetadataDispatch } = meshMetadata
+  const { numDims, numElements, numNodes, nodesPerElement } = meshMetadataState
 
-  const { baseMesh, baseMeshDispatch, activeProp } = state
   const { activeMeshPropState, activeMeshPropStateDispatch } = activeProp
   const { showCoordinates, showBaseMesh, showElements, showSplits } =
     activeMeshPropState
@@ -23,14 +21,24 @@ export function BaseMesh ({ state, generateMesh }) {
     <div className='w-full flex'>
       <div className='w-1/2'>
         <MeshMetadata
-          dims={{ numDims, setNumDims }}
-          elements={{ numElements, setNumElements }}
+          dims={{
+            numDims,
+            setNumDims: payload =>
+              meshMetadataDispatch({ type: 'numDims', payload })
+          }}
+          elements={{
+            numElements,
+            setNumElements: payload =>
+              meshMetadataDispatch({ type: 'numElements', payload })
+          }}
           nodes={{
             nodesPerElement,
-            setNodesPerElement,
+            setNodesPerElement: payload =>
+              meshMetadataDispatch({ type: 'nodesPerElement', payload }),
             setShowCoordinates: () =>
               activeMeshPropStateDispatch({ type: 'coordinates' }),
-            setNumNodes
+            setNumNodes: payload =>
+              meshMetadataDispatch({ type: 'numNodes', payload })
           }}
         />
         {showCoordinates && (
@@ -38,35 +46,34 @@ export function BaseMesh ({ state, generateMesh }) {
             state={{ coordinates, baseMeshDispatch }}
             showElements={() =>
               activeMeshPropStateDispatch({ type: 'elements' })
-            }
+            } //   eslint-disable-line react/jsx-curly-newline
             numDims={numDims}
             numNodes={numNodes}
-          >
-            {showElements && (
-              <Elements
-                state={{
-                  elements,
-                  baseMeshDispatch,
-                  numElements,
-                  nodesPerElement
-                }}
-                showSplits={() =>
-                  activeMeshPropStateDispatch({ type: 'splitting' })
-                }
-                vizBaseMesh={() =>
-                  activeMeshPropStateDispatch({ type: 'baseMesh' })
-                }
-                numNodes={numNodes}
-              />
-            )}
-            {showSplits && (
-              <Splits
-                state={{ splitting, baseMeshDispatch }}
-                generateMesh={generateMesh}
-                nodes={numNodes}
-              />
-            )}
-          </Coordinates>
+          />
+        )}
+        {showElements && (
+          <Elements
+            state={{
+              elements,
+              baseMeshDispatch,
+              numElements,
+              nodesPerElement
+            }}
+            showSplits={() =>
+              activeMeshPropStateDispatch({ type: 'splitting' })
+            } //   eslint-disable-line react/jsx-curly-newline
+            vizBaseMesh={() =>
+              activeMeshPropStateDispatch({ type: 'baseMesh' })
+            } //   eslint-disable-line react/jsx-curly-newline
+            numNodes={numNodes}
+          />
+        )}
+        {showSplits && (
+          <Splits
+            state={{ splitting, baseMeshDispatch }}
+            generateMesh={generateMesh}
+            nodes={numNodes}
+          />
         )}
       </div>
       <div className='w-1/2 h-full'>

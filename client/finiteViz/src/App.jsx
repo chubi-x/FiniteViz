@@ -2,7 +2,11 @@ import Tabs from './views/Tabs'
 import { OutputMesh } from './Meshes/OutputMesh/OutputMesh'
 import { BaseMesh } from './Meshes/BaseMesh'
 import { useReducer, useState } from 'react'
-import { activeMeshPropStateReducer, meshReducer } from './reducers/meshReducer'
+import {
+  activeMeshPropStateReducer,
+  meshReducer,
+  meshMetadataReducer
+} from './reducers/meshReducer'
 
 export default function App () {
   const [baseActive, setBaseActive] = useState(true)
@@ -11,6 +15,15 @@ export default function App () {
     elements: [],
     splitting: []
   })
+  const [meshMetadataState, meshMetadataDispatch] = useReducer(
+    meshMetadataReducer,
+    {
+      numDims: 2,
+      numElements: 3,
+      numNodes: 0,
+      nodesPerElement: 4
+    }
+  )
   const [activeMeshPropState, activeMeshPropStateDispatch] = useReducer(
     activeMeshPropStateReducer,
     {
@@ -34,8 +47,15 @@ export default function App () {
         Accept: 'application/json'
       }
     })
+    const resdata = await response.json()
+    console.log(resdata)
 
-    console.log(await response.json())
+    const id = resdata.meta.id
+    const res = await fetch(`http://localhost:3000/poll/${id}`)
+    const result = await res.json()
+    console.log(result)
+    // setNewMesh(result.data.payload)
+    setBaseActive(false)
   }
 
   return (
@@ -45,7 +65,8 @@ export default function App () {
           state={{
             baseMesh,
             baseMeshDispatch,
-            activeProp: { activeMeshPropState, activeMeshPropStateDispatch }
+            activeProp: { activeMeshPropState, activeMeshPropStateDispatch },
+            meshMetadata: { meshMetadataState, meshMetadataDispatch }
           }}
           generateMesh={generateMesh}
         />

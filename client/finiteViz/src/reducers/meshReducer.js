@@ -57,3 +57,24 @@ export function activeMeshPropStateReducer (state, action) {
       return state
   }
 }
+
+export function meshMetadataReducer (state, action) {
+  const { type, payload } = action
+  let newState
+  switch (type) {
+    case 'numDims':
+      newState = { ...state, numDims: payload }
+      return newState
+    case 'numNodes':
+      newState = { ...state, numNodes: payload }
+      return newState
+    case 'numElements':
+      newState = { ...state, numElements: payload }
+      return newState
+    case 'nodesPerElement':
+      newState = { ...state, nodesPerElement: payload }
+      return newState
+    default:
+      return state
+  }
+}
