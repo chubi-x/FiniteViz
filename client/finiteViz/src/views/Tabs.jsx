@@ -1,5 +1,5 @@
 export default function Tabs ({ activeTab, children }) {
-  const { baseActive, setBaseActive } = activeTab
+  const { baseActive, setBaseActive, outputNotReady } = activeTab
   const setBg = active => {
     return active
       ? 'bg-white border-md rounded-lg text-indigo-900'
@@ -22,6 +22,7 @@ export default function Tabs ({ activeTab, children }) {
         <li>
           <button
             onClick={e => setActive(e.target.innerText)}
+            disabled={outputNotReady}
             className={`flex w-full justify-center rounded-lg ${setBg(
               !baseActive
             )}  py-2`}

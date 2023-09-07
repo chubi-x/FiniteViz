@@ -54,7 +54,13 @@ export default function App () {
   }
 
   return (
-    <Tabs activeTab={{ baseActive, setBaseActive }}>
+    <Tabs
+      activeTab={{
+        baseActive,
+        setBaseActive,
+        outputNotReady: meshId.length === 0
+      }}
+    >
       {baseActive && (
         <BaseMesh
           state={{
