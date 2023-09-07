@@ -403,10 +403,10 @@ private:
     {
         amqp_members.channel->BasicAck(envelope);
     }
-    //	void reject_message(const AmqpClient::Envelope::ptr_t &envelope) const
-    //	{
-    //		amqp_members.channel->BasicReject(envelope, false);
-    //	}
+    void reject_message(const AmqpClient::Envelope::ptr_t &envelope) const
+    {
+        amqp_members.channel->BasicReject(envelope, false);
+    }
 
     void send_results(const string *task_id, json *message)
     {
@@ -455,7 +455,7 @@ public:
                 {"message", results.message}};
 
             send_results(results.task_id, &task_payload);
-            ack_message(envelope);
+            results.status == TaskStatus[SUCCESS] ? ack_message(envelope) : reject_message(envelope);
         }
         // cancel consumer
         amqp_members.channel->BasicCancel(amqp_members.consumer_tag);
