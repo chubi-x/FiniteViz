@@ -1,11 +1,21 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 export default function Splits ({ nodes, state, generateMesh }) {
   const { splitting, baseMeshDispatch } = state
+
   const defaultSplits = [
-    [0, 1, 2],
-    [0, 3, 2],
-    [1, 4, 2]
+    [0, 1, 5],
+    [0, 3, 5],
+    [1, 4, 4]
   ]
+  const useDefaultSplits = true
+
+  useEffect(
+    () =>
+      useDefaultSplits
+        ? baseMeshDispatch({ type: 'splitting', payload: defaultSplits })
+        : null,
+    []
+  )
   const [newSplit, setNewSplit] = useState(['', '', ''])
   const splitsComplete = () =>
     splitting.length > 0 &&
@@ -23,8 +33,8 @@ export default function Splits ({ nodes, state, generateMesh }) {
 
   async function checkSplits () {
     if (splitsComplete()) {
-      await generateMesh()
-    }
+      generateMesh()
+    } else window.alert('Please enter at least 1 split sequence')
   }
   function populateNodes () {
     const nodesArray = []
