@@ -66,15 +66,9 @@ export function BaseMesh ({ state, children }) {
             numNodes={numNodes}
           />
         )}
-        {showSplits && (
-          <Splits
-            state={{ splitting, baseMeshDispatch }}
-            generateMesh={generateMesh}
-            nodes={numNodes}
-          />
-        )}
+        {children}
       </div>
-      <div className='w-1/2 h-full'>
+      <div className='w-2/3 h-full'>
         {showBaseMesh && (
           <Viz
             elements={elements}
