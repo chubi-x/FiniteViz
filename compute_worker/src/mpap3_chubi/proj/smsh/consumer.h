@@ -169,7 +169,7 @@ private:
         BOOST_LOG_TRIVIAL(info) << "Channel created successfully!";
 
         BOOST_LOG_TRIVIAL(info) << "Connecting Consumer to AMQP...";
-
+        channel->DeclareQueue("request", false, true, false, false);
         auto consumer_tag = channel->BasicConsume(amqp_connector.AMQP_QUEUE, "", true, false, false, 1);
         BOOST_LOG_TRIVIAL(info) << "Consumer connected successfully!";
 
@@ -206,6 +206,7 @@ private:
         set_properties(const json &property, const string &property_name, std::vector<std::vector<T>> &mesh_property,
                        std::size_t *mesh_rows, std::size_t *mesh_cols)
         {
+
             property.get_to(mesh_property);
             if (property_name != "splitting")
             {
@@ -263,6 +264,14 @@ private:
                     valid_json = false;
                     message_stream << "Error parsing property: " << propertyName;
                     BOOST_LOG_TRIVIAL(error) << "Error parsing property: " << propertyName << " from data payload: "
+                                             << *task_id << endl;
+                    break;
+                }
+                catch (const json::type_error &e)
+                {
+                    valid_json = false;
+                    message_stream << "Unexpected type for: " << propertyName;
+                    BOOST_LOG_TRIVIAL(error) << "Unexpected type for: " << propertyName << " from data payload: "
                                              << *task_id << endl;
                     break;
                 }
