@@ -80,7 +80,7 @@ export default function App () {
           )}
         </BaseMesh>
       )}
-      {!baseActive && <OutputMesh newMesh={newMesh} />}
+      {!baseActive && <OutputMesh id={meshId} />}
     </Tabs>
   )
 }
