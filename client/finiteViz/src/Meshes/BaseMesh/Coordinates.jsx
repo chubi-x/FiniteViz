@@ -12,6 +12,15 @@ export default function Coordinates ({
   )
   const [useDefaultCoordinates] = useState(true)
 
+  // const defaultCoordinates = [
+  //   [0.0, 0.0],
+  //   [1.0, 0.0],
+  //   [1.0, 1.0],
+  //   [0.0, 1.0],
+  //   [2.0, 0.0],
+  //   [2.0, 2.0],
+  //   [0.0, 2.0]
+  // ]
   const defaultCoordinates = [
     [0.0, 0.0],
     [1.0, 0.0],
@@ -62,19 +71,25 @@ export default function Coordinates ({
                   x:{' '}
                   <NumericFormat
                     value={coordinates[node][0]}
-                    onChange={e => setCoordinate(node, 0, e.target.value)}
+                    onValueChange={({ floatValue }) =>
+                      setCoordinate(node, 0, floatValue)
+                    }
                   />
                   y:{' '}
                   <NumericFormat
                     value={coordinates[node][1]}
-                    onChange={e => setCoordinate(node, 1, e.target.value)}
+                    onValueChange={({ floatValue }) =>
+                      setCoordinate(node, 1, floatValue)
+                    }
                   />
                   {numDims > 2 && (
                     <>
                       z:{' '}
                       <NumericFormat
                         value={coordinates[node][2]}
-                        onChange={e => setCoordinate(node, 2, e.target.value)}
+                        onValueChange={({ floatValue }) =>
+                          setCoordinate(node, 2, floatValue)
+                        }
                       />
                     </>
                   )}
