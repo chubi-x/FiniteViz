@@ -1,25 +1,23 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import MeshMetadata from './MeshMetadata'
 import Coordinates from './Coordinates'
 import Elements from './Elements'
-import Splits from './Splits'
 import Viz from './Viz'
-export function BaseMesh ({ state, generateMesh }) {
+
+export function BaseMesh ({ state, children }) {
   const { baseMesh, baseMeshDispatch, activeProp, meshMetadata } = state
   const { meshMetadataState, meshMetadataDispatch } = meshMetadata
   const { numDims, numElements, numNodes, nodesPerElement } = meshMetadataState
 
   const { activeMeshPropState, activeMeshPropStateDispatch } = activeProp
-  const { showCoordinates, showBaseMesh, showElements, showSplits } =
-    activeMeshPropState
-  const { coordinates, elements, splitting } = baseMesh
+  const { showCoordinates, showBaseMesh, showElements } = activeMeshPropState
+  const { coordinates, elements } = baseMesh
 
   const vizParent = useRef()
 
-  useEffect(() => {}, [])
   return (
     <div className='w-full flex'>
-      <div className='w-1/2'>
+      <div className='w-1/3'>
         <MeshMetadata
           dims={{
             numDims,
