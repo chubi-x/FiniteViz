@@ -2,6 +2,7 @@ import Tabs from './views/Tabs'
 import { OutputMesh } from './Meshes/OutputMesh/OutputMesh'
 import { BaseMesh } from './Meshes/BaseMesh'
 import { useReducer, useState } from 'react'
+import { useGenerateMesh } from './api/useQueryMesh'
 import {
   activeMeshPropStateReducer,
   meshReducer,
@@ -33,29 +34,23 @@ export default function App () {
       showSplits: false
     }
   )
-  const { coordinates, elements, splitting } = baseMesh
-  const [newMesh, setNewMesh] = useState({})
+  const { splitting } = baseMesh
+  const [meshId, setMeshId] = useState('')
+  const { mutate } = useGenerateMesh()
 
-  async function generateMesh () {
-    const response = await fetch('http://localhost:3000/message', {
-      method: 'POST',
-      body: JSON.stringify({ elements, coordinates, splitting }),
-      // credentials: 'include',
-      mode: 'cors',
-      headers: {
-        'Content-type': 'application/json',
-        Accept: 'application/json'
+  function generateMesh () {
+    mutate(baseMesh, {
+      onSuccess (response) {
+        if (response?.success) {
+          setMeshId(response.meta.task_id)
+          setBaseActive(false)
+        } else window.alert(response?.message)
+      },
+      onError (err) {
+        console.log(err)
+        window.alert('Failed to generate mesh. Please try again later.')
       }
     })
-    const resdata = await response.json()
-    console.log(resdata)
-
-    const id = resdata.meta.id
-    const res = await fetch(`http://localhost:3000/poll/${id}`)
-    const result = await res.json()
-    console.log(result)
-    // setNewMesh(result.data.payload)
-    setBaseActive(false)
   }
 
   return (
