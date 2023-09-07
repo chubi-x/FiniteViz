@@ -328,7 +328,7 @@ private:
         {
             cout << "setting dimensions..." << endl;
 
-            fem.x.setDim(static_cast<int>(mesh.num_dims) * mesh.num_nodes); //casting is not a problem since num_dims is always either 2 or 3
+            fem.x.setDim(static_cast<int>(mesh.num_dims) * mesh.num_nodes); // casting is not a problem since num_dims is always either 2 or 3
         }
         catch (const MosException &e)
         {
@@ -364,7 +364,7 @@ private:
         }
         std::unique_ptr<NewFemMesh> new_mesh_results = std::move(fem.writeMeshToVector());
         // print out output
-//        fem.writeMeshToFile("mine.mesh");
+        //        fem.writeMeshToFile("mine.mesh");
         std::unique_ptr<NewMesh> new_mesh = std::make_unique<NewMesh>();
         new_mesh->coordinates = std::move(new_mesh_results->coordinates);
         new_mesh->elements = std::move(new_mesh_results->elements);
