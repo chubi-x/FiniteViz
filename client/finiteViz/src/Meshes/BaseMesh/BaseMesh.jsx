@@ -80,6 +80,7 @@ export function BaseMesh ({ state, children }) {
             elements={elements}
             coordinates={coordinates}
             parent={vizParent}
+            isBaseMesh
           />
         )}
       </div>
