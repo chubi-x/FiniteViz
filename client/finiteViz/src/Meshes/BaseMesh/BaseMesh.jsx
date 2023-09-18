@@ -15,6 +15,20 @@ export function BaseMesh ({ state, styles, children }) {
 
   const vizParent = useRef()
 
+  function clearMesh () {
+    const types = ['coordinates', 'elements', 'splitting']
+    types.forEach(type => {
+      baseMeshDispatch({
+        type,
+        payload: []
+      })
+      activeMeshPropStateDispatch({ type, payload: false })
+    })
+    meshMetadataDispatch({ type: 'numDims', payload: 2 })
+    meshMetadataDispatch({ type: 'numElements', payload: 0 })
+    meshMetadataDispatch({ type: 'nodesPerElement', payload: 0 })
+    meshMetadataDispatch({ type: 'numNodes', payload: 0 })
+  }
   return (
     <div className='w-full flex gap-x-6'>
       <div className='w-1/3'>
@@ -67,6 +81,16 @@ export function BaseMesh ({ state, styles, children }) {
           />
         )}
         {children}
+        {(showCoordinates || showElements) && (
+          <div className='mt-10'>
+            <button
+              onClick={clearMesh}
+              className={`${styles.buttonStyles} !bg-red-600`}
+            >
+              Clear Mesh
+            </button>
+          </div>
+        )}
       </div>
           <div className='w-2/3 grow'>
             <Viz
