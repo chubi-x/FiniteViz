@@ -356,7 +356,7 @@ private:
         catch (const MosException &e)
         {
             BOOST_LOG_TRIVIAL(error) << "Error performing splitting: " << e.what();
-            return std::move(mesh_generation_error(("Error splitting " + split_error_nodes).c_str()));
+            return std::move(mesh_generation_error(("Error splitting Base Mesh " + split_error_nodes + e.what()).c_str()));
         }
         std::unique_ptr<NewFemMesh> new_mesh_results = std::move(fem.writeMeshToVector());
         // print out output
