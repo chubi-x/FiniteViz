@@ -351,7 +351,11 @@ private:
             // cout << "splitting..." << endl;
 
             for (const auto &node : mesh.splitting)
+            {
                 fem.split(node[0], node[1], node[2]);
+                split_error_nodes = node[0] + " " + node[1];
+                cout << split_error_nodes;
+            }
         }
         catch (const MosException &e)
         {
@@ -458,9 +462,8 @@ public:
                 {"status", results.status},
                 {"payload", results.payload != nullptr ? *results.payload : nullptr},
                 {"message", results.message}};
-
-            send_results(results.task_id, &task_payload);
             results.status == TaskStatus[SUCCESS] ? ack_message(envelope) : reject_message(envelope);
+            send_results(results.task_id, &task_payload);
         }
         // cancel consumer
         amqp_members.channel->BasicCancel(amqp_members.consumer_tag);
