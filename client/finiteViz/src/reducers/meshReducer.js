@@ -26,31 +26,31 @@ export function meshReducer (state, action) {
 }
 
 export function activeMeshPropStateReducer (state, action) {
-  const { type } = action
+  const { type, payload } = action
   let newState
   switch (type) {
     case 'coordinates':
       newState = {
         ...state,
-        showCoordinates: true
+        showCoordinates: payload
       }
       return newState
     case 'elements':
       newState = {
         ...state,
-        showElements: true
+        showElements: payload
       }
       return newState
     case 'splitting':
       newState = {
         ...state,
-        showSplits: true
+        showSplits: payload
       }
       return newState
     case 'baseMesh':
       newState = {
         ...state,
-        showBaseMesh: true
+        showBaseMesh: payload
       }
       return newState
     default:
