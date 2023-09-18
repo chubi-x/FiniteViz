@@ -1,26 +1,26 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 export default function Splits ({ nodes, state, generateMesh, styles }) {
   const { splitting, baseMeshDispatch } = state
   const { buttonStyles } = styles
+  // const defaultSplits = [
+  //   [0, 1, 5],
+  //   [0, 3, 5],
+  //   [1, 4, 4]
+  // ]
+  // const useDefaultSplits = false
 
-  const defaultSplits = [
-    [0, 1, 5],
-    [0, 3, 5],
-    [1, 4, 4]
-  ]
-  const useDefaultSplits = true
-
-  useEffect(
-    () =>
-      useDefaultSplits
-        ? baseMeshDispatch({ type: 'splitting', payload: defaultSplits })
-        : null,
-    []
-  )
+  // useEffect(
+  //   () =>
+  //     useDefaultSplits
+  //       ? baseMeshDispatch({ type: 'splitting', payload: defaultSplits })
+  //       : undefined,
+  //   []
+  // )
   const [newSplit, setNewSplit] = useState(['', '', ''])
   const splitsComplete = () =>
     splitting.length > 0 &&
     splitting.every(split => split.every(cell => cell !== ''))
+
   const newSplitComplete = newSplit.every(cell => cell !== '')
 
   function addSplits () {
