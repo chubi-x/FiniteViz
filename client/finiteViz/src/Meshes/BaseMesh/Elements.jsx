@@ -77,7 +77,9 @@ export default function Elements ({ state, numNodes, showSplits, styles }) {
   }
   return (
     <>
-      <form id='elements' className=''>
+      <form id='elements' className='mt-8 space-y-4'>
+        <h1 className='text-2xl font-bold'>Mesh Properties</h1>
+
         {elements.length > 0 &&
           defineElementNodes().map((element, index) => (
             <div key={index}>{element}</div>

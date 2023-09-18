@@ -70,7 +70,7 @@ export default function Splits ({ nodes, state, generateMesh, styles }) {
     ))
   }
   return (
-    <form id='splitting' className='my-10'>
+    <form id='splitting' className='my-10 space-y-4'>
       <div className='my-6'>
         {splitting.length > 0 &&
           splitting.map((split, index) => (

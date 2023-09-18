@@ -16,7 +16,7 @@ export function BaseMesh ({ state, styles, children }) {
   const vizParent = useRef()
 
   return (
-    <div className='w-full flex'>
+    <div className='w-full flex gap-x-6'>
       <div className='w-1/3'>
         <MeshMetadata
           dims={{
