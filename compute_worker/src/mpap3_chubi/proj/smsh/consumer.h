@@ -316,7 +316,7 @@ private:
         {
             for (int e = 0; e < mesh.num_elements; e++)
                 fem.generateElement(mesh_type, elements + e * (mesh.nodes_per_element),
-                                    mesh.nodes_per_element - 1); //-1 because of extra element
+                                    mesh.nodes_per_element); //-1 because of extra element
         }
         catch (const MosException &e)
         {
