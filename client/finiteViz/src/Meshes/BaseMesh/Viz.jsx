@@ -78,12 +78,12 @@ export default function Viz ({ coordinates, elements, isBaseMesh }) {
       scene.add(point)
       const textGeometry = new TextGeometry(node.toString(), {
         font,
-        size: 0.02,
+        size: 0.07,
         height: 0.02
       })
       const pointLabel = new THREE.Mesh(textGeometry, textMaterial)
       pointLabel.position.set(x, y - 0.2, z - 0.2 || 0)
-      // scene.add(pointLabel)
+      isBaseMesh && scene.add(pointLabel)
     })
   }
 
@@ -117,14 +117,13 @@ export default function Viz ({ coordinates, elements, isBaseMesh }) {
       // label element face
       const textGeometry = new TextGeometry(`${elIndex}`, {
         font,
-        size: 0.04,
+        size: isBaseMesh ? 0.05 : 0.03,
         height: 0.02
       })
       const labelMaterial = new THREE.MeshBasicMaterial({ color: 'yellow' })
       const elLabel = new THREE.Mesh(textGeometry, labelMaterial)
       elLabel.position.set(center.x, center.y, center.z)
       scene.add(elLabel)
-      const line = new THREE.LineLoop(geometry, lineMaterial)
       scene.add(line)
     })
   }
