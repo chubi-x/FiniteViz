@@ -1,4 +1,11 @@
+import { NumericFormat } from 'react-number-format'
+export default function MeshMetadata ({
+  dims,
+  elements,
+  nodes,
+  children,
   styles
+}) {
   const { numDims, setNumDims } = dims
   const { numElements, setNumElements } = elements
   const {
@@ -9,16 +16,31 @@
   } = nodes
   const { buttonStyles, inputStyles } = styles
   const enableEnterCoords =
+    numDims > 0 && nodesPerElement > 0 && numElements > 0
+
+  function updateNumNodes () {
+    let numNodes
+    if (numDims === 2 || (numElements > 1 && numDims === 3)) {
+      numNodes = numElements + nodesPerElement
+    } else numNodes = nodesPerElement
+    console.log(numNodes)
+    setNumNodes(numNodes)
+  }
   function enterCoords () {
-    if (numDims > 0 && nodesPerElement > 0 && numElements > 0) {
-      setNumNodes(numElements + nodesPerElement)
-      // setDisableEnterCoords(true)
-      setShowCoordinates(true)
-    } else {
-      window.alert(
-        'Enter the number of dimensions and nodes in your original mesh'
-      )
-    }
+    updateNumNodes()
+    setShowCoordinates(true)
+  }
+  function updateNumDims (e) {
+    const val = parseInt(e.target.value)
+    if (val === 2 || val === 3) {
+      setNumDims(val)
+      updateNumNodes()
+    } else e.preventDefault()
+  }
+  function updateElements (e, setter) {
+    const val = parseInt(e.target.value)
+    if (!isNaN(val)) setter(val)
+    else setter('')
   }
   return (
     <>
@@ -31,7 +53,7 @@
               className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
               id='numDims'
               value={numDims}
-              onChange={e => setNumDims(parseInt(e.target.value))}
+              onChange={e => updateNumDims(e)}
               type='number'
               max='3'
               min='2'
@@ -43,6 +65,7 @@
             Num Elements
             <NumericFormat
               className={inputStyles}
+              onChange={e => updateElements(e, setNumElements)}
               value={numElements}
             />
           </label>
@@ -53,12 +76,13 @@
             <NumericFormat
               className={inputStyles}
               value={nodesPerElement}
+              onChange={e => updateElements(e, setNodesPerElement)}
             />
           </label>
         </div>
         <button
           onClick={enterCoords}
-          disabled={disableEnterCoords}
+          disabled={!enableEnterCoords}
           type='button'
           className={` ${
             !enableEnterCoords ? 'cursor-not-allowed' : ''
