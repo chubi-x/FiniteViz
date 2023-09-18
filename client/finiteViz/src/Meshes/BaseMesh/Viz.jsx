@@ -135,5 +135,5 @@ export default function Viz ({ coordinates, elements, isBaseMesh }) {
     camera.updateProjectionMatrix()
     renderer.render(scene, camera)
   }
-  return <div ref={refContainer} style={{ width: '100%', height: '100%' }} />
+  return <div className='h-full' ref={refContainer} />
 }
