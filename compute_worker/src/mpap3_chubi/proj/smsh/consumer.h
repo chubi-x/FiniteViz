@@ -123,7 +123,7 @@ public:
 class Worker
 {
 private:
-    string REDIS_HOST = "tcp://172.17.0.4:6379";
+    string REDIS_HOST = "tcp://172.17.0.2:6379";
     Redis redis;
     enum TaskStatus
     {
