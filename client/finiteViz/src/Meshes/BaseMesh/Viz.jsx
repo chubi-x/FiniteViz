@@ -8,7 +8,7 @@ import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry.js'
 
 import { useEffect, useRef } from 'react'
 
-export default function Viz ({ coordinates, elements, isBaseMesh }) {
+export default function Viz ({ coordinates, elements, isBaseMesh, is3D }) {
   const refContainer = useRef()
   useEffect(() => {
     const fontLoader = new FontLoader()
