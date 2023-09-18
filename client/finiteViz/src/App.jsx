@@ -36,22 +36,32 @@ export default function App () {
     }
   )
   const { splitting } = baseMesh
-  const [meshId, setMeshId] = useState('')
+  const [meshId, setMeshId] = useState(
+    window.localStorage.getItem('meshId') ?? ''
+  )
+  const [baseActive, setBaseActive] = useState(!meshId)
   const { mutate } = useGenerateMesh()
 
   function generateMesh () {
-    mutate(baseMesh, {
-      onSuccess (response) {
-        if (response?.success) {
-          setMeshId(response.meta.task_id)
-          setBaseActive(false)
-        } else window.alert(response?.message)
-      },
-      onError (err) {
-        console.log(err)
-        window.alert('Failed to generate mesh. Please try again later.')
-      }
-    })
+    try {
+      mutate(baseMesh, {
+        onSuccess (response) {
+          if (response?.success) {
+            setMeshId(response.meta.task_id)
+            //  save mesh Id to local local storage
+            window.localStorage.setItem('meshId', response.meta.task_id)
+            setBaseActive(false)
+          } else window.alert(response?.message)
+        },
+        onError (err) {
+          console.log(err)
+          window.alert('Failed to generate mesh. Please try again later.')
+        }
+      })
+    } catch (err) {
+      console.log(err)
+      window.alert(err)
+    }
   }
 
   return (
