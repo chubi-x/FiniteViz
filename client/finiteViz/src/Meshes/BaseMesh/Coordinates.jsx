@@ -13,6 +13,7 @@ export default function Coordinates ({
   )
   const { buttonStyles } = styles
 
+  // const [useDefaultCoordinates] = useState(false)
   // const defaultCoordinates = [
   //   [0.0, 0.0],
   //   [1.0, 0.0],
@@ -22,24 +23,43 @@ export default function Coordinates ({
   //   [2.0, 2.0],
   //   [0.0, 2.0]
   // ]
-  const defaultCoordinates = [
-    [0.0, 0.0],
-    [1.0, 0.0],
-    [1.0, 1.0],
-    [0.0, 1.0],
-    [2.0, 0.0],
-    [2.0, 2.0],
-    [0.0, 2.0]
-  ]
 
   useEffect(() => {
+    let newCoords
+    if (coordinates.length === 0) {
+      newCoords = initialCoordinates
+    } else {
+      if (numDims <= 3) {
+        newCoords = initialCoordinates.map((_, index) => {
+          return numDims === 3
+            ? [...coordinates[index], '']
+            : coordinates[index]?.slice(0, 2)
+        })
+      } else newCoords = coordinates
+    }
+    baseMeshDispatch({
+      type: 'coordinates',
+      payload: newCoords
+    })
+  }, [numDims])
+  useEffect(() => {
+    // console.log(numNodes)
     if (coordinates.length === 0) {
       baseMeshDispatch({
         type: 'coordinates',
-        payload: useDefaultCoordinates ? defaultCoordinates : initialCoordinates
+        payload: initialCoordinates
+      })
+    } else {
+      let newCoords
+      if (coordinates.length > numNodes) {
+        newCoords = coordinates.slice(0, numNodes)
+      } else newCoords = coordinates
+      baseMeshDispatch({
+        type: 'coordinates',
+        payload: newCoords
       })
     }
-  }, [])
+  }, [numNodes])
   const checkCoordinatesComplete = () =>
     coordinates.every(node => node.every(coord => coord !== ''))
   function defineElements () {
