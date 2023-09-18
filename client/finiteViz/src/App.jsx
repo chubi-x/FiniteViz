@@ -11,7 +11,6 @@ import {
 } from './reducers/meshReducer'
 
 export default function App () {
-  const [baseActive, setBaseActive] = useState(true)
   const [baseMesh, baseMeshDispatch] = useReducer(meshReducer, {
     coordinates: [],
     elements: [],
