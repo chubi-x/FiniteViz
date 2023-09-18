@@ -10,7 +10,7 @@ export function BaseMesh ({ state, styles, children }) {
   const { numDims, numElements, numNodes, nodesPerElement } = meshMetadataState
 
   const { activeMeshPropState, activeMeshPropStateDispatch } = activeProp
-  const { showCoordinates, showBaseMesh, showElements } = activeMeshPropState
+  const { showCoordinates, showElements } = activeMeshPropState
   const { coordinates, elements } = baseMesh
 
   const vizParent = useRef()
@@ -33,8 +33,8 @@ export function BaseMesh ({ state, styles, children }) {
             nodesPerElement,
             setNodesPerElement: payload =>
               meshMetadataDispatch({ type: 'nodesPerElement', payload }),
-            setShowCoordinates: () =>
-              activeMeshPropStateDispatch({ type: 'coordinates' }),
+            setShowCoordinates: payload =>
+              activeMeshPropStateDispatch({ type: 'coordinates', payload }),
             setNumNodes: payload =>
               meshMetadataDispatch({ type: 'numNodes', payload })
           }}
@@ -43,8 +43,8 @@ export function BaseMesh ({ state, styles, children }) {
         {showCoordinates && (
           <Coordinates
             state={{ coordinates, baseMeshDispatch }}
-            showElements={() =>
-              activeMeshPropStateDispatch({ type: 'elements' })
+            showElements={payload =>
+              activeMeshPropStateDispatch({ type: 'elements', payload })
             } //   eslint-disable-line react/jsx-curly-newline
             numDims={numDims}
             numNodes={numNodes}
@@ -60,11 +60,8 @@ export function BaseMesh ({ state, styles, children }) {
               numElements,
               nodesPerElement
             }}
-            showSplits={() =>
-              activeMeshPropStateDispatch({ type: 'splitting' })
-            } //   eslint-disable-line react/jsx-curly-newline
-            vizBaseMesh={() =>
-              activeMeshPropStateDispatch({ type: 'baseMesh' })
+            showSplits={payload =>
+              activeMeshPropStateDispatch({ type: 'splitting', payload })
             } //   eslint-disable-line react/jsx-curly-newline
             numNodes={numNodes}
           />
