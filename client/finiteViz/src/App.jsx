@@ -72,25 +72,31 @@ export default function App () {
         outputNotReady: meshId.length === 0
       }}
     >
-      {baseActive && (
-        <BaseMesh
-          state={{
-            baseMesh,
-            baseMeshDispatch,
-            activeProp: { activeMeshPropState, activeMeshPropStateDispatch },
-            meshMetadata: { meshMetadataState, meshMetadataDispatch }
-          }}
-        >
-          {activeMeshPropState.showSplits && (
-            <Splits
-              state={{ splitting, baseMeshDispatch }}
-              generateMesh={generateMesh}
-              nodes={meshMetadataState.numNodes}
-            />
-          )}
-        </BaseMesh>
-      )}
-      {!baseActive && <OutputMesh id={meshId} />}
+      {
+        /* eslint-disable multiline-ternary */
+        baseActive ? (
+          <BaseMesh
+            styles={styles}
+            state={{
+              baseMesh,
+              baseMeshDispatch,
+              activeProp: { activeMeshPropState, activeMeshPropStateDispatch },
+              meshMetadata: { meshMetadataState, meshMetadataDispatch }
+            }}
+          >
+            {activeMeshPropState.showSplits && (
+              <Splits
+                styles={styles}
+                state={{ splitting, baseMeshDispatch }}
+                generateMesh={generateMesh}
+                nodes={meshMetadataState.numNodes}
+              />
+            )}
+          </BaseMesh>
+        ) : (
+          <OutputMesh id={meshId} />
+        )
+      }
     </Tabs>
   )
 }
