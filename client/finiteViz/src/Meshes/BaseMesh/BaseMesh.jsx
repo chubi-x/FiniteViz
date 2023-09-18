@@ -4,7 +4,7 @@ import Coordinates from './Coordinates'
 import Elements from './Elements'
 import Viz from './Viz'
 
-export function BaseMesh ({ state, children }) {
+export function BaseMesh ({ state, styles, children }) {
   const { baseMesh, baseMeshDispatch, activeProp, meshMetadata } = state
   const { meshMetadataState, meshMetadataDispatch } = meshMetadata
   const { numDims, numElements, numNodes, nodesPerElement } = meshMetadataState
@@ -38,6 +38,7 @@ export function BaseMesh ({ state, children }) {
             setNumNodes: payload =>
               meshMetadataDispatch({ type: 'numNodes', payload })
           }}
+          styles={styles}
         />
         {showCoordinates && (
           <Coordinates
@@ -47,10 +48,12 @@ export function BaseMesh ({ state, children }) {
             } //   eslint-disable-line react/jsx-curly-newline
             numDims={numDims}
             numNodes={numNodes}
+            styles={styles}
           />
         )}
         {showElements && (
           <Elements
+            styles={styles}
             state={{
               elements,
               baseMeshDispatch,

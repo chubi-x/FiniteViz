@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-export default function Splits ({ nodes, state, generateMesh }) {
+export default function Splits ({ nodes, state, generateMesh, styles }) {
   const { splitting, baseMeshDispatch } = state
+  const { buttonStyles } = styles
 
   const defaultSplits = [
     [0, 1, 5],
@@ -137,7 +138,10 @@ export default function Splits ({ nodes, state, generateMesh }) {
           disabled={!splitsComplete()}
           id=''
           type='button'
-          className='bg-blue-300 p-2 rounded-md'
+          className={`
+          
+          ${!splitsComplete() ? 'cursor-not-allowed' : ''}
+          ${buttonStyles} !bg-green-500`}
         >
           Generate Mesh
         </button>

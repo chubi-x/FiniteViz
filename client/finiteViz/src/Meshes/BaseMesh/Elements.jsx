@@ -1,24 +1,8 @@
 import { useEffect } from 'react'
-export default function Elements ({ state, numNodes, showSplits, vizBaseMesh }) {
-  // const { elements, setElements } = elementsState
+export default function Elements ({ state, numNodes, showSplits, styles }) {
   const { elements, baseMeshDispatch, nodesPerElement, numElements } = state
-  const useDefaultElements = true
-
-  useEffect(
-    () =>
-      // setElements(useDefaultElements ? defaultElements : initialElements)
-      baseMeshDispatch({
-        type: 'elements',
-        payload: useDefaultElements ? defaultElements : initialElements
-      }),
-    []
-  )
-
-  const defaultElements = [
-    [0, 1, 2, 3, 1],
-    [1, 4, 5, 2, 1],
-    [3, 2, 5, 6, 1]
-  ]
+  const { buttonStyles } = styles
+  // const defaultElements = [
   const initialElements = Array.from({ length: numElements }, () =>
     new Array(nodesPerElement).fill('')
   )
@@ -104,7 +88,9 @@ export default function Elements ({ state, numNodes, showSplits, vizBaseMesh }) 
             onClick={() => showSplits(true)}
             disabled={!checkElementsComplete()}
             type='button'
-            className='bg-blue-300 p-2 rounded-md'
+            className={` ${
+              !checkElementsComplete() ? 'cursor-not-allowed' : ''
+            } ${buttonStyles}`}
           >
             Define Splits
           </button>

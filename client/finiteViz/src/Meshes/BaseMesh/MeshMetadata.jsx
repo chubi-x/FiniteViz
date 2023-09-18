@@ -1,5 +1,4 @@
-import { useState } from 'react'
-export default function MeshMetadata ({ dims, elements, nodes, children }) {
+  styles
   const { numDims, setNumDims } = dims
   const { numElements, setNumElements } = elements
   const {
@@ -8,7 +7,8 @@ export default function MeshMetadata ({ dims, elements, nodes, children }) {
     setShowCoordinates,
     setNumNodes
   } = nodes
-  const [disableEnterCoords] = useState(false)
+  const { buttonStyles, inputStyles } = styles
+  const enableEnterCoords =
   function enterCoords () {
     if (numDims > 0 && nodesPerElement > 0 && numElements > 0) {
       setNumNodes(numElements + nodesPerElement)
@@ -39,10 +39,8 @@ export default function MeshMetadata ({ dims, elements, nodes, children }) {
         <div>
           <label htmlFor='numElements'>
             Num Elements
-            <input
-              id='numElements'
-              type='number'
-              onChange={e => setNumElements(parseInt(e.target.value))}
+            <NumericFormat
+              className={inputStyles}
               value={numElements}
             />
           </label>
@@ -50,10 +48,8 @@ export default function MeshMetadata ({ dims, elements, nodes, children }) {
         <div>
           <label htmlFor='nodesPerElement'>
             Nodes Per Element
-            <input
-              id='nodesPerElement'
-              type='number'
-              onChange={e => setNodesPerElement(parseInt(e.target.value))}
+            <NumericFormat
+              className={inputStyles}
               value={nodesPerElement}
             />
           </label>
@@ -62,7 +58,9 @@ export default function MeshMetadata ({ dims, elements, nodes, children }) {
           onClick={enterCoords}
           disabled={disableEnterCoords}
           type='button'
-          className='bg-blue-300 p-2 rounded-md'
+          className={` ${
+            !enableEnterCoords ? 'cursor-not-allowed' : ''
+          } ${buttonStyles}`}
         >
           Enter Node Coordinates
         </button>
