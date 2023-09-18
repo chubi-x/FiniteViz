@@ -40,10 +40,35 @@ export function OutputMesh ({ id }) {
   }, [isSuccess, isFetching])
 
   const vizParent = useRef()
-  //  show elements and coordinates (probably reusing components)
+  //  TODO: add loading state
   return (
     <>
       <div className='w-full flex justify-between h-full gap-x-4'>
+        {
+          /*  eslint-disable multiline-ternary */
+          resultsReady ? (
+            <>
+              <div className='w-2/5 h-full'>
+                <div className='h-full'>
+                  {meshReady && (
+                    <>
+                      <h1 className='text-2xl font-bold'>Coordinates</h1>
+                      <Table
+                        is3D={mesh.coordinates[0].length > 2}
+                        itemList={mesh.coordinates}
+                        styles='h-1/2'
+                      />
+                      <h1 className='text-2xl font-bold'>Elements</h1>
+                      <Table
+                        isElements
+                        itemList={mesh.elements}
+                        styles='h-1/2'
+                      />
+                    </>
+                  )}
+                </div>
+              </div>
+              <div className='w-2/3 grow'>
                 {meshReady && (
                   <Viz
                     elements={mesh.elements}
@@ -55,6 +80,8 @@ export function OutputMesh ({ id }) {
                     }
                   />
                 )}
+              </div>
+            </>
           ) : canRefetch() ? (
             <div>Fetching Mesh...</div>
           ) : (
