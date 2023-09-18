@@ -44,6 +44,17 @@ export function OutputMesh ({ id }) {
   return (
     <>
       <div className='w-full flex justify-between h-full gap-x-4'>
+                {meshReady && (
+                  <Viz
+                    elements={mesh.elements}
+                    coordinates={mesh.coordinates}
+                    parent={vizParent}
+                    is3D={
+                      mesh.coordinates.length > 0 &&
+                      mesh.coordinates[0].length === 3
+                    }
+                  />
+                )}
           ) : canRefetch() ? (
             <div>Fetching Mesh...</div>
           ) : (
