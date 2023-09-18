@@ -60,12 +60,12 @@ export default function Viz ({ coordinates, elements, isBaseMesh, is3D }) {
   }
   function setupOrbitControls (camera, renderer) {
     const orbitControls = new OrbitControls(camera, renderer.domElement)
-    const mapControls = new MapControls(camera, renderer.domElement)
-    mapControls.screenSpacePanning = true
+    // const mapControls = new MapControls(camera, renderer.domElement)
+    // mapControls.screenSpacePanning = true
     orbitControls.enableZoom = true
-    orbitControls.enablePan = is3D
-    orbitControls.enableRotate = is3D
-    return orbitControls
+    orbitControls.enablePan = !!is3D
+    orbitControls.enableRotate = !!is3D
+    // return orbitControls
   }
   function drawPoints (scene, font) {
     const pointGeometry = new THREE.SphereGeometry(0.03)
