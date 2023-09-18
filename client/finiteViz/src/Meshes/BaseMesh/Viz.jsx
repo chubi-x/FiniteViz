@@ -8,10 +8,6 @@ import { useEffect, useState, useRef } from 'react'
 
 export default function Viz ({ coordinates, elements, isBaseMesh }) {
   const refContainer = useRef()
-  const [renderer, setRenderer] = useState()
-  const is3D = useState(coordinates[0].length > 2)[0]
-  const [camera, setCamera] = useState()
-
   useEffect(() => {
     const fontLoader = new FontLoader()
     const { scene, renderer, camera } = setupScene()
@@ -38,10 +34,6 @@ export default function Viz ({ coordinates, elements, isBaseMesh }) {
       renderer.dispose()
     }
   }, [coordinates, elements])
-  useEffect(() => {
-    renderer && camera && window.addEventListener('resize', handleWindowResize)
-    return () => window.removeEventListener('resize', handleWindowResize)
-  }, [])
 
   function setupScene () {
     const { current: container } = refContainer
@@ -60,9 +52,8 @@ export default function Viz ({ coordinates, elements, isBaseMesh }) {
     container.hasChildNodes()
       ? container.replaceChildren(renderer.domElement)
       : container.appendChild(renderer.domElement)
-    setRenderer(renderer)
-    setCamera(camera)
     scene.position.set(-1, -0.5, 0)
+
     return { scene, camera, renderer }
   }
   function setupOrbitControls (camera, renderer) {
