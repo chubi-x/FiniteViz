@@ -2,9 +2,11 @@ import * as THREE from 'three'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { MapControls } from 'three/addons/controls/MapControls.js'
+import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry.js'
 
-import { useEffect, useState, useRef } from 'react'
+// import { MapControls } from 'three/addons/controls/MapControls.js'
+
+import { useEffect, useRef } from 'react'
 
 export default function Viz ({ coordinates, elements, isBaseMesh }) {
   const refContainer = useRef()
@@ -89,13 +91,26 @@ export default function Viz ({ coordinates, elements, isBaseMesh }) {
     // draw line between points to specify elements
     elements.forEach((el, elIndex) => {
       const points = []
-      for (let i = 0; isBaseMesh ? i < el.length - 1 : i < el.length; i++) {
+      for (let i = 0; i < el.length; i++) {
         coordinates
           .filter((_, node) => node === el[i])
-          .forEach(([x, y, z]) => points.push(new THREE.Vector3(x, y, z || 0)))
+          .forEach(([x, y, z]) => {
+            points.push(new THREE.Vector3(x, y, z || 0))
+          })
       }
-      const lineMaterial = new THREE.LineBasicMaterial({ color: 'green' })
-      const geometry = new THREE.BufferGeometry().setFromPoints(points)
+      const lineMaterial = new THREE.LineBasicMaterial({
+        color: 'green',
+        linewidth: 0.01
+      })
+      let geometry, line
+      if (is3D) {
+        geometry = new ConvexGeometry(points)
+        const edges = new THREE.EdgesGeometry(geometry)
+        line = new THREE.LineSegments(edges, lineMaterial)
+      } else {
+        geometry = new THREE.BufferGeometry().setFromPoints(points)
+        line = new THREE.LineLoop(geometry, lineMaterial)
+      }
       geometry.computeBoundingBox() // compute bounding box
       const center = new THREE.Vector3()
       geometry.boundingBox.getCenter(center)
