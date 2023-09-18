@@ -314,7 +314,6 @@ private:
         double *coordinates = flattened_coordinates->data();
         try
         {
-            cout << "generating elements..." << endl;
             for (int e = 0; e < mesh.num_elements; e++)
                 fem.generateElement(mesh_type, elements + e * (mesh.nodes_per_element),
                                     mesh.nodes_per_element - 1); //-1 because of extra element
@@ -326,8 +325,6 @@ private:
         }
         try
         {
-            cout << "setting dimensions..." << endl;
-
             fem.x.setDim(static_cast<int>(mesh.num_dims) * mesh.num_nodes); // casting is not a problem since num_dims is always either 2 or 3
         }
         catch (const MosException &e)
@@ -338,7 +335,6 @@ private:
         // set coordinates
         try
         {
-            cout << "setting coordinates..." << endl;
             for (int n = 0; n < flattened_coordinates->size(); n++)
                 fem.x[n] = coordinates[n];
         }
@@ -352,7 +348,7 @@ private:
         string split_error_nodes;
         try
         {
-            cout << "splitting..." << endl;
+            // cout << "splitting..." << endl;
 
             for (const auto &node : mesh.splitting)
                 fem.split(node[0], node[1], node[2]);
