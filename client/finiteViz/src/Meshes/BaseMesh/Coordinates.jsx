@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { NumericFormat } from 'react-number-format'
+import { useEffect } from 'react'
+import Table from '../../views/Table'
 export default function Coordinates ({
   state,
   numDims,
@@ -74,17 +74,32 @@ export default function Coordinates ({
       )
     })
   }
-  function makeCoordsInputs () {
-    const nodes = []
-    for (let i = 0; i < numNodes; i++) nodes.push(i)
-    return nodes
-  }
-
   return (
     <>
+      <form id='coordinates' className='mt-10'>
+        <h1 className='text-2xl font-bold mb-5'>Nodes</h1>
+
+        <div className='space-y-3'>
+          {coordinates.length > 0 && (
+            <Table
+              isBaseMesh
+              is3D={coordinates[0].length > 2}
+              cellSetter={setCoordinate}
+              itemList={coordinates}
+              styles=''
+            />
+          )}
+          <button
+            disabled={!checkCoordinatesComplete()}
+            onClick={defineElements}
+            type='button'
             className={` w-full ${
               !checkCoordinatesComplete() ? 'cursor-not-allowed' : ''
             } ${buttonStyles}`}
+          >
+            Define Element Nodes
+          </button>
+        </div>
       </form>
     </>
   )
