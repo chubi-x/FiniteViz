@@ -92,6 +92,10 @@ export function BaseMesh ({ state, styles, children }) {
           </div>
         )}
       </div>
+      {/* <div className='w-2/3 h-full'> */}
+      {
+        /* eslint-disable multiline-ternary */
+        showCoordinates ? (
           <div className='w-2/3 grow'>
             <Viz
               elements={elements}
@@ -101,6 +105,15 @@ export function BaseMesh ({ state, styles, children }) {
               isBaseMesh
             />
           </div>
+        ) : (
+          <div className='w-2/3 flex justify-center items-center'>
+            <h1 className='text-xl font-medium'>
+              Enter Coordinates to show Visualisation
+            </h1>
+          </div>
+        )
+      }
+      {/* </div> */}
     </div>
   )
 }
