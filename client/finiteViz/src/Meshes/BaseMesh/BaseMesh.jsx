@@ -68,16 +68,15 @@ export function BaseMesh ({ state, styles, children }) {
         )}
         {children}
       </div>
-      <div className='w-2/3 h-full'>
-        {showBaseMesh && (
-          <Viz
-            elements={elements}
-            coordinates={coordinates}
-            parent={vizParent}
-            isBaseMesh
-          />
-        )}
-      </div>
+          <div className='w-2/3 grow'>
+            <Viz
+              elements={elements}
+              is3D={coordinates.length > 0 && coordinates[0].length === 3}
+              coordinates={coordinates}
+              parent={vizParent}
+              isBaseMesh
+            />
+          </div>
     </div>
   )
 }

@@ -1,4 +1,12 @@
-export default function Table ({ is3D, isElements, itemList, styles }) {
+import { NumericFormat } from 'react-number-format'
+export default function Table ({
+  is3D,
+  isElements,
+  isBaseMesh,
+  cellSetter,
+  itemList,
+  styles
+}) {
   let headers = (
     <tr>
       <th scope='col' className='px-6 text-lg py-3' />
@@ -37,19 +45,37 @@ export default function Table ({ is3D, isElements, itemList, styles }) {
           {headers}
         </thead>
         <tbody className='font-medium'>
-          {itemList.map((row, rowIndex) => (
-            <tr
-              key={rowIndex}
-              className='bg-white border-b dark:bg-gray-800 dark:border-gray-700'
-            >
-              <td className='px-6 py-4'>{rowLabel(rowIndex)}</td>
-              {row.map((cell, cellIndex) => (
-                <td key={cellIndex} className='px-6 py-4'>
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {itemList.length > 0 &&
+            itemList.map((row, rowIndex) => (
+              <tr
+                key={rowIndex}
+                className='bg-white border-b dark:bg-gray-800 dark:border-gray-700'
+              >
+                <td className='px-6 py-4'>{rowLabel(rowIndex)}</td>
+                {row.length > 0 &&
+                  row.map((cell, cellIndex) => (
+                    <td
+                      key={cellIndex}
+                      className={`${!isBaseMesh ? 'px-6 py-4' : ''}`}
+                    >
+                      {
+                        /*  eslint-disable multiline-ternary, react/jsx-curly-newline */
+                        isBaseMesh ? (
+                          <NumericFormat
+                            className='bg-white px-6 py-4 dark:bg-gray-600 h-full w-full border'
+                            value={itemList[rowIndex][cellIndex]}
+                            onValueChange={({ floatValue }) =>
+                              cellSetter(rowIndex, cellIndex, floatValue)
+                            }
+                          />
+                        ) : (
+                          cell
+                        )
+                      }
+                    </td>
+                  ))}
+              </tr>
+            ))}
         </tbody>
       </table>
     </div>
