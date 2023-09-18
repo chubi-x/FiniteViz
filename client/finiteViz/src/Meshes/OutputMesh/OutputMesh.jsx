@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { pollNewMesh } from '../../api'
 import Viz from '../BaseMesh/Viz'
 import Table from '../../views/Table'
 
 export function OutputMesh ({ id }) {
   const [resultsReady, setResultsReady] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const [mesh, setMesh] = useState(Object.create({}))
   const MAX_REFETCH = 20
   const refetchCount = window.sessionStorage.getItem(`${id}-refetchCount`) ?? 0
@@ -32,8 +32,11 @@ export function OutputMesh ({ id }) {
 
   const meshReady = Object.keys(mesh).length > 0
   useEffect(() => {
-    if (data?.success) setMesh(data?.data?.payload)
-    if (data?.status === 'SUCCESS') setResultsReady(true)
+    if (data?.success && data?.status === 'SUCCESS') {
+      setMesh(data?.data?.payload)
+      window.sessionStorage.setItem(`${id}-refetchCount`, 0)
+      setResultsReady(true)
+    } else setErrorMessage(data?.message)
   }, [isSuccess, isFetching])
 
   const vizParent = useRef()
@@ -41,32 +44,15 @@ export function OutputMesh ({ id }) {
   return (
     <>
       <div className='w-full flex justify-between h-full gap-x-4'>
-        <div className='w-2/5 h-full'>
-          <div className='h-full'>
-            {meshReady && (
-              <>
-                <h1 className='text-2xl font-bold'>Coordinates</h1>
-                <Table
-                  is3D={mesh.coordinates[0].length > 2}
-                  itemList={mesh.coordinates}
-                  styles='h-1/2'
-                />
-                <h1 className='text-2xl font-bold'>Elements</h1>
-                <Table isElements itemList={mesh.elements} styles='h-1/2' />
-              </>
-            )}
-          </div>
-        </div>
-        <div className='w-1/2 grow'>
-          Results
-          {meshReady && (
-            <Viz
-              elements={mesh.elements}
-              coordinates={mesh.coordinates}
-              parent={vizParent}
-            />
-          )}
-        </div>
+          ) : canRefetch() ? (
+            <div>Fetching Mesh...</div>
+          ) : (
+            <h1 className='text-xl font-medium'>
+              {errorMessage ||
+                'There was an error fetching your mesh. Please try again later.'}
+            </h1>
+          )
+        }
       </div>
     </>
   )
