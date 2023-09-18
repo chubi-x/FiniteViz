@@ -6,11 +6,28 @@ import Table from '../../views/Table'
 
 export function OutputMesh ({ id }) {
   const [resultsReady, setResultsReady] = useState(false)
-  const [mesh, setMesh] = useState(Object.create())
+  const [mesh, setMesh] = useState(Object.create({}))
+  const MAX_REFETCH = 20
+  const refetchCount = window.sessionStorage.getItem(`${id}-refetchCount`) ?? 0
+
+  const canRefetch = () => parseInt(refetchCount) < MAX_REFETCH && !errorMessage
+  // if (!canRefetch) window.localStorage.setItem(`${id}-refetchCount`, 0)
   const { isFetching, data, isSuccess } = useQuery(
     ['poll-mesh', id],
-    () => pollNewMesh(id),
-    { enabled: !resultsReady, refetchInterval: 3000 }
+    async () => {
+      const response = await fetch(`http://127.0.0.1:3000/poll/${id}`, {
+        // signal: AbortSignal.timeout(5000)
+      })
+      window.sessionStorage.setItem(
+        `${id}-refetchCount`,
+        parseInt(refetchCount) + 1
+      )
+      return await response.json()
+    },
+    {
+      enabled: !resultsReady,
+      refetchInterval: canRefetch() ? 5000 : false
+    }
   )
 
   const meshReady = Object.keys(mesh).length > 0

@@ -11,7 +11,4 @@ export async function generateMesh (body) {
   })
   return await response.json()
 }
-export async function pollNewMesh (meshId) {
-  const response = await fetch(`http://127.0.0.1:3000/poll/${meshId}`, {})
-  return await response.json()
-}
+// export async function pollNewMesh
