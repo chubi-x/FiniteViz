@@ -15,6 +15,9 @@ export default function Viz ({ coordinates, elements, isBaseMesh }) {
   useEffect(() => {
     const fontLoader = new FontLoader()
     const { scene, renderer, camera } = setupScene()
+    window.addEventListener('resize', () =>
+      handleWindowResize(renderer, scene, camera)
+    )
     fontLoader.load('fonts/helvetica.json', font => {
       drawPoints(scene, font)
       connectElements(font, scene)
@@ -29,6 +32,9 @@ export default function Viz ({ coordinates, elements, isBaseMesh }) {
     animate()
     return () => {
       window.cancelAnimationFrame(req)
+      window.removeEventListener('resize', () =>
+        handleWindowResize(renderer, scene, camera)
+      )
       renderer.dispose()
     }
   }, [coordinates, elements])
@@ -116,14 +122,13 @@ export default function Viz ({ coordinates, elements, isBaseMesh }) {
       scene.add(line)
     })
   }
-  function handleWindowResize () {
+  function handleWindowResize (renderer, scene, camera) {
     const width = refContainer.current.clientWidth
     const height = refContainer.current.clientHeight
     renderer.setSize(width, height)
-
     camera.aspect = width / height
     camera.updateProjectionMatrix()
-    // renderer.render(scen)
+    renderer.render(scene, camera)
   }
   return <div ref={refContainer} style={{ width: '100%', height: '100%' }} />
 }
