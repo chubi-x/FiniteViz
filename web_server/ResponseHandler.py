@@ -49,7 +49,7 @@ def error_response_object(success: bool, error: str):
     return json.dumps(
         {
             "success": success,
-            "error": error,
+            "message": error,
         }
     )
 
