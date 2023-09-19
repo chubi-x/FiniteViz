@@ -17,7 +17,7 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
     level=logging.ERROR,
 )
-REDIS_HOST = "172.17.0.4"
+REDIS_HOST = "172.17.0.2"
 pool = redis.ConnectionPool(host=REDIS_HOST, port=6379, db=0)
 redis_store = redis.Redis(connection_pool=pool, decode_responses=True)
 
@@ -65,7 +65,9 @@ def message():
         redis_store.set(task_id, json.dumps(message))
     except Exception as err:
         LOGGER.error("Error saving task to redis: %s", str(err))
-        return ResponseHandler.server_error(message="Error processing task")
+        return ResponseHandler.server_error(
+            message="Error processing task. Please try again later."
+        )
 
     message_sent, err = publisher.send_message(message)
     consumers_active = publisher.check_consumers_active()
