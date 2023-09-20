@@ -3,6 +3,8 @@ import MeshMetadata from './MeshMetadata'
 import Coordinates from './Coordinates'
 import Elements from './Elements'
 import Viz from './Viz'
+import { PanelGroup, Panel } from 'react-resizable-panels'
+import ResizeHandle from '../../components/ResizeHandle'
 
 export function BaseMesh ({ state, styles, children }) {
   const { baseMesh, baseMeshDispatch, activeProp, meshMetadata } = state
@@ -30,8 +32,8 @@ export function BaseMesh ({ state, styles, children }) {
     meshMetadataDispatch({ type: 'numNodes', payload: 0 })
   }
   return (
-    <div className='w-full flex gap-x-6'>
-      <div className='w-1/3'>
+    <PanelGroup direction='horizontal'>
+      <Panel defaultSize={20} minSize={20} className='!overflow-y-scroll'>
         <MeshMetadata
           dims={{
             numDims,
@@ -84,6 +86,7 @@ export function BaseMesh ({ state, styles, children }) {
         {(showCoordinates || showElements) && (
           <div className='mt-10'>
             <button
+              type='button'
               onClick={clearMesh}
               className={`${styles.buttonStyles} !bg-red-600`}
             >
@@ -91,20 +94,23 @@ export function BaseMesh ({ state, styles, children }) {
             </button>
           </div>
         )}
-      </div>
-      {/* <div className='w-2/3 h-full'> */}
+      </Panel>
       {
         /* eslint-disable multiline-ternary */
         showCoordinates ? (
-          <div className='w-2/3 grow'>
-            <Viz
-              elements={elements}
-              is3D={coordinates.length > 0 && coordinates[0].length === 3}
-              coordinates={coordinates}
-              parent={vizParent}
-              isBaseMesh
-            />
-          </div>
+          <>
+            <ResizeHandle />
+
+            <Panel defaultSize={70} minSize={50}>
+              <Viz
+                elements={elements}
+                is3D={coordinates.length > 0 && coordinates[0].length === 3}
+                coordinates={coordinates}
+                parent={vizParent}
+                isBaseMesh
+              />
+            </Panel>
+          </>
         ) : (
           <div className='w-2/3 flex justify-center items-center'>
             <h1 className='text-xl font-medium'>
@@ -113,7 +119,6 @@ export function BaseMesh ({ state, styles, children }) {
           </div>
         )
       }
-      {/* </div> */}
-    </div>
+    </PanelGroup>
   )
 }
