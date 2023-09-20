@@ -68,7 +68,7 @@ export default function Viz ({ coordinates, elements, isBaseMesh, is3D }) {
     // return orbitControls
   }
   function drawPoints (scene, font) {
-    const pointGeometry = new THREE.SphereGeometry(0.03)
+    const pointGeometry = new THREE.SphereGeometry(0.01)
     const pointMaterial = new THREE.MeshBasicMaterial({ color: 'white' })
     const textMaterial = new THREE.MeshBasicMaterial({ color: 'pink' })
     coordinates.forEach((coord, node) => {
