@@ -32,60 +32,55 @@ export default function Elements ({ state, numNodes, showSplits, styles }) {
       )
     })
   }
-  function printElementOptions () {
+  function elementOptions () {
     const options = []
     for (let i = 0; i < numNodes; i++) options.push(i)
     return options
   }
-  function defaultNodeValues (numElements) {
-    const defaults = []
+  function elementNodes () {
+    const nodes = []
     for (let i = 0; i < nodesPerElement; i++) {
-      defaults.push('Choose Node')
+      nodes.push(i)
     }
-    return defaults
+    return nodes
   }
-  function defineElementNodes () {
+  function defineElements () {
     const elements = []
     for (let i = 0; i < numElements; i++) {
-      const element = (
-        <div key={i}>
-          Element {i}:
-          <div>
-            Nodes:
-            {defaultNodeValues(i).map((defaultValue, j) => (
-              <select
-                defaultValue={defaultValue}
-                onChange={e => updateElements(i, j, e.target.value)}
-                key={j}
-              >
-                <option disabled value='Choose Node'>
-                  Choose Node
-                </option>
-                {printElementOptions().map(option => (
-                  <option key={option} value={option}>
-                    {' '}
-                    {option}{' '}
-                  </option>
-                ))}
-              </select>
-            ))}
-          </div>
-        </div>
-      )
-      elements.push(element)
+      elements.push(i)
     }
     return elements
   }
   return (
     <>
       <form id='elements' className='mt-8 space-y-4'>
-        <h1 className='text-2xl font-bold'>Mesh Properties</h1>
+        <h1 className='text-2xl font-bold'>Elements</h1>
 
         {elements.length > 0 &&
-          defineElementNodes().map((element, index) => (
-            <div key={index}>{element}</div>
+          defineElements().map((_, i) => (
+            <div key={i}>
+              <h1 className='text-lg font-medium'>Element {i}</h1>
+              <div>
+                {elementNodes().map((_, j) => (
+                  <select
+                    defaultValue='Choose Node'
+                    onChange={e => updateElements(i, j, e.target.value)}
+                    key={j}
+                  >
+                    <option disabled value='Choose Node'>
+                      Choose Node
+                    </option>
+                    {elementOptions().map(option => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                ))}
+              </div>
+            </div>
           ))}
-        <div className='space-x-3'>
+        <div className='space-x-3 flex'>
           <button
             id='defineSplits'
             onClick={() => showSplits(true)}
@@ -96,6 +91,18 @@ export default function Elements ({ state, numNodes, showSplits, styles }) {
             } ${buttonStyles}`}
           >
             Define Splits
+          </button>
+          <button
+            type='button'
+            onClick={() =>
+              baseMeshDispatch({
+                type: 'elements',
+                payload: initialElements
+              })
+            } //  eslint-disable-line react/jsx-curly-newline
+            className={`${styles.buttonStyles} !bg-red-600`}
+          >
+            Clear Elements
           </button>
         </div>
       </form>
