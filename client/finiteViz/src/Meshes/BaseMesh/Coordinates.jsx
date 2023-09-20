@@ -23,7 +23,6 @@ export default function Coordinates ({
   //   [2.0, 2.0],
   //   [0.0, 2.0]
   // ]
-
   useEffect(() => {
     let newCoords
     if (coordinates.length === 0) {
@@ -43,7 +42,6 @@ export default function Coordinates ({
     })
   }, [numDims])
   useEffect(() => {
-    // console.log(numNodes)
     if (coordinates.length === 0) {
       baseMeshDispatch({
         type: 'coordinates',
@@ -51,9 +49,14 @@ export default function Coordinates ({
       })
     } else {
       let newCoords
-      if (coordinates.length > numNodes) {
+      if (coordinates.length >= numNodes) {
         newCoords = coordinates.slice(0, numNodes)
-      } else newCoords = coordinates
+      } else {
+        newCoords = coordinates.slice()
+        for (let i = 0; i < numNodes - coordinates.length; i++) {
+          newCoords.push(new Array(numDims).fill(''))
+        }
+      }
       baseMeshDispatch({
         type: 'coordinates',
         payload: newCoords
