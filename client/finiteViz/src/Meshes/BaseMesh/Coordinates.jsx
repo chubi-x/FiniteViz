@@ -9,7 +9,7 @@ export default function Coordinates ({
 }) {
   const { coordinates, baseMeshDispatch } = state
   const initialCoordinates = Array.from({ length: numNodes }, () =>
-    new Array(numDims < 3 ? 2 : 3).fill('')
+    new Array(numDims).fill('')
   )
   const { buttonStyles } = styles
 
