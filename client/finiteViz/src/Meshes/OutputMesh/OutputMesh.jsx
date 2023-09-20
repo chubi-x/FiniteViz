@@ -11,18 +11,29 @@ export function OutputMesh ({ id }) {
   const refetchCount = window.sessionStorage.getItem(`${id}-refetchCount`) ?? 0
 
   const canRefetch = () => parseInt(refetchCount) < MAX_REFETCH && !errorMessage
+
   // if (!canRefetch) window.localStorage.setItem(`${id}-refetchCount`, 0)
   const { isFetching, data, isSuccess } = useQuery(
     ['poll-mesh', id],
     async () => {
-      const response = await fetch(`http://127.0.0.1:3000/poll/${id}`, {
-        // signal: AbortSignal.timeout(5000)
-      })
-      window.sessionStorage.setItem(
-        `${id}-refetchCount`,
-        parseInt(refetchCount) + 1
-      )
-      return await response.json()
+      try {
+        const response = await fetch(`http://127.0.0.1:3000/poll/${id}`, {
+          signal: AbortSignal.timeout(10000)
+        })
+        window.sessionStorage.setItem(
+          `${id}-refetchCount`,
+          parseInt(refetchCount) + 1
+        )
+        return await response.json()
+      } catch (e) {
+        if (e.message.includes('aborted')) {
+          setErrorMessage(
+            'There was an error retreiving your mesh. Please check your internet connection and try again.'
+          )
+          window.sessionStorage.setItem(`${id}-refetchCount`, MAX_REFETCH)
+        }
+        return false
+      }
     },
     {
       enabled: !resultsReady,
@@ -83,7 +94,7 @@ export function OutputMesh ({ id }) {
               </div>
             </>
           ) : canRefetch() ? (
-            <div>Fetching Mesh...</div>
+            <h1 className='text-xl font-medium'>Fetching Mesh...</h1>
           ) : (
             <h1 className='text-xl font-medium'>
               {errorMessage ||
