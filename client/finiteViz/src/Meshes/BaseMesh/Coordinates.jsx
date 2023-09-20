@@ -27,7 +27,7 @@ export default function Coordinates ({
   useEffect(() => {
     let newCoords
     if (coordinates.length === 0) {
-      newCoords = initialCoordinates
+      newCoords = initialCoordinates.slice()
     } else {
       if (numDims <= 3) {
         newCoords = initialCoordinates.map((_, index) => {
@@ -35,7 +35,7 @@ export default function Coordinates ({
             ? [...coordinates[index], '']
             : coordinates[index]?.slice(0, 2)
         })
-      } else newCoords = coordinates
+      } else newCoords = coordinates.slice()
     }
     baseMeshDispatch({
       type: 'coordinates',
