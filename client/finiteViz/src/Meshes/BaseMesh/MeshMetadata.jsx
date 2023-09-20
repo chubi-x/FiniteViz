@@ -23,7 +23,6 @@ export default function MeshMetadata ({
     if (numDims === 2 || (numElements > 1 && numDims === 3)) {
       numNodes = numElements + nodesPerElement
     } else numNodes = nodesPerElement
-    console.log(numNodes)
     setNumNodes(numNodes)
   }
   function enterCoords () {
