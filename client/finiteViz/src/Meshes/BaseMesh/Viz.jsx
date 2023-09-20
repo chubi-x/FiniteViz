@@ -13,9 +13,8 @@ export default function Viz ({ coordinates, elements, isBaseMesh, is3D }) {
   useEffect(() => {
     const fontLoader = new FontLoader()
     const { scene, renderer, camera } = setupScene()
-    window.addEventListener('resize', () =>
-      handleWindowResize(renderer, scene, camera)
-    )
+    const observer = handleViewerResize(renderer, camera, scene)
+    observer.observe(refContainer.current)
     fontLoader.load('fonts/helvetica.json', font => {
       drawPoints(scene, font)
       connectElements(font, scene)
@@ -30,13 +29,22 @@ export default function Viz ({ coordinates, elements, isBaseMesh, is3D }) {
     animate()
     return () => {
       window.cancelAnimationFrame(req)
-      window.removeEventListener('resize', () =>
-        handleWindowResize(renderer, scene, camera)
-      )
+      observer.disconnect()
       renderer.dispose()
     }
   }, [coordinates, elements])
 
+  function handleViewerResize (renderer, camera, scene) {
+    const resizeObserver = new window.ResizeObserver(([viewer]) => {
+      const { blockSize: newHeight, inlineSize: newWidth } =
+        viewer.contentBoxSize[0]
+      renderer.setSize(newWidth, newHeight)
+      camera.aspect = newWidth / newHeight
+      camera.updateProjectionMatrix()
+      renderer.render(scene, camera)
+    })
+    return resizeObserver
+  }
   function setupScene () {
     const { current: container } = refContainer
     // if (container && !renderer) {
@@ -127,13 +135,6 @@ export default function Viz ({ coordinates, elements, isBaseMesh, is3D }) {
       scene.add(line)
     })
   }
-  function handleWindowResize (renderer, scene, camera) {
-    const width = refContainer.current.clientWidth
-    const height = refContainer.current.clientHeight
-    renderer.setSize(width, height)
-    camera.aspect = width / height
-    camera.updateProjectionMatrix()
-    renderer.render(scene, camera)
-  }
+
   return <div className='h-full' ref={refContainer} />
 }
