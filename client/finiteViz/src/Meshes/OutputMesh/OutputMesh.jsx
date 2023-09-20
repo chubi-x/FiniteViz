@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import { PanelGroup, Panel } from 'react-resizable-panels'
+import ResizeHandle from '../../components/ResizeHandle'
 import { useQuery } from '@tanstack/react-query'
 import Viz from '../BaseMesh/Viz'
 import Table from '../../views/Table'
@@ -54,45 +56,44 @@ export function OutputMesh ({ id }) {
   //  TODO: add loading state
   return (
     <>
-      <div className='w-full flex justify-between h-full gap-x-4'>
+      <div className='w-full flex h-full pb-14'>
         {
           /*  eslint-disable multiline-ternary */
           resultsReady ? (
-            <>
-              <div className='w-2/5 h-full'>
-                <div className='h-full'>
-                  {meshReady && (
-                    <>
-                      <h1 className='text-2xl font-bold'>Coordinates</h1>
-                      <Table
-                        is3D={mesh.coordinates[0].length > 2}
-                        itemList={mesh.coordinates}
-                        styles='h-1/2'
-                      />
-                      <h1 className='text-2xl font-bold'>Elements</h1>
-                      <Table
-                        isElements
-                        itemList={mesh.elements}
-                        styles='h-1/2'
-                      />
-                    </>
-                  )}
-                </div>
-              </div>
-              <div className='w-2/3 grow'>
-                {meshReady && (
-                  <Viz
-                    elements={mesh.elements}
-                    coordinates={mesh.coordinates}
-                    parent={vizParent}
-                    is3D={
-                      mesh.coordinates.length > 0 &&
-                      mesh.coordinates[0].length === 3
-                    }
-                  />
-                )}
-              </div>
-            </>
+            <PanelGroup direction='horizontal' className='h-full'>
+              {meshReady && (
+                <>
+                  <Panel
+                    defaultSize={20}
+                    minSize={20}
+                    collapsible
+                    className='h-full'
+                  >
+                    <h1 className='text-2xl font-bold'>Coordinates</h1>
+                    <Table
+                      is3D={mesh.coordinates[0].length > 2}
+                      itemList={mesh.coordinates}
+                      styles='h-1/2'
+                    />
+                    <h1 className='text-2xl font-bold'>Elements</h1>
+                    <Table isElements itemList={mesh.elements} styles='h-1/2' />
+                  </Panel>
+                  <ResizeHandle />
+
+                  <Panel defaultSize={70} minSize={50}>
+                    <Viz
+                      elements={mesh.elements}
+                      coordinates={mesh.coordinates}
+                      parent={vizParent}
+                      is3D={
+                        mesh.coordinates.length > 0 &&
+                        mesh.coordinates[0].length === 3
+                      }
+                    />
+                  </Panel>
+                </>
+              )}
+            </PanelGroup>
           ) : canRefetch() ? (
             <h1 className='text-xl font-medium'>Fetching Mesh...</h1>
           ) : (
