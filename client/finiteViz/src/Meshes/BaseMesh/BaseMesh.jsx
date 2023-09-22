@@ -34,66 +34,67 @@ export function BaseMesh ({ state, styles, children }) {
   return (
     <PanelGroup direction='horizontal'>
       <Panel defaultSize={20} minSize={20} className='!overflow-y-scroll'>
-        <MeshMetadata
-          dims={{
-            numDims,
-            setNumDims: payload =>
-              meshMetadataDispatch({ type: 'numDims', payload })
-          }}
-          elements={{
-            numElements,
-            setNumElements: payload =>
-              meshMetadataDispatch({ type: 'numElements', payload })
-          }}
-          nodes={{
-            nodesPerElement,
-            setNodesPerElement: payload =>
-              meshMetadataDispatch({ type: 'nodesPerElement', payload }),
-            setShowCoordinates: payload =>
-              activeMeshPropStateDispatch({ type: 'coordinates', payload }),
-            setNumNodes: payload =>
-              meshMetadataDispatch({ type: 'numNodes', payload })
-          }}
-          styles={styles}
-        />
-        {showCoordinates && (
-          <Coordinates
-            state={{ coordinates, baseMeshDispatch }}
-            showElements={payload =>
-              activeMeshPropStateDispatch({ type: 'elements', payload })
-            } //   eslint-disable-line react/jsx-curly-newline
-            numDims={numDims}
-            numNodes={numNodes}
-            styles={styles}
-          />
-        )}
-        {showElements && (
-          <Elements
-            styles={styles}
-            state={{
-              elements,
-              baseMeshDispatch,
-              numElements,
-              nodesPerElement
+        <>
+          <MeshMetadata
+            dims={{
+              numDims,
+              setNumDims: payload =>
+                meshMetadataDispatch({ type: 'numDims', payload })
             }}
-            showSplits={payload =>
-              activeMeshPropStateDispatch({ type: 'splitting', payload })
-            } //   eslint-disable-line react/jsx-curly-newline
-            numNodes={numNodes}
+            elements={{
+              numElements,
+              setNumElements: payload =>
+                meshMetadataDispatch({ type: 'numElements', payload })
+            }}
+            nodes={{
+              nodesPerElement,
+              setNodesPerElement: payload =>
+                meshMetadataDispatch({ type: 'nodesPerElement', payload }),
+              setShowCoordinates: payload =>
+                activeMeshPropStateDispatch({ type: 'coordinates', payload }),
+              setNumNodes: payload =>
+                meshMetadataDispatch({ type: 'numNodes', payload })
+            }}
+            styles={styles}
           />
-        )}
-        {children}
-        {(showCoordinates || showElements) && (
-          <div className='mt-10'>
-            <button
-              type='button'
-              onClick={clearMesh}
-              className={`${styles.buttonStyles} !bg-red-600`}
-            >
-              Clear Mesh
-            </button>
-          </div>
-        )}
+          {showCoordinates && (
+            <Coordinates
+              state={{ coordinates, baseMeshDispatch }}
+              showElements={payload =>
+                activeMeshPropStateDispatch({ type: 'elements', payload })
+              } //   eslint-disable-line react/jsx-curly-newline
+              numDims={numDims}
+              numNodes={numNodes}
+              styles={styles}
+            />
+          )}
+          {showElements && (
+            <Elements
+              styles={styles}
+              state={{
+                elements,
+                baseMeshDispatch,
+                numElements,
+                nodesPerElement
+              }}
+              showSplits={payload =>
+                activeMeshPropStateDispatch({ type: 'splitting', payload })
+              } //   eslint-disable-line react/jsx-curly-newline
+              numNodes={numNodes}
+            />
+          )}
+          {children}
+          {(showCoordinates || showElements) && (
+            <div className='mt-10'>
+              <button
+                onClick={clearMesh}
+                className={`${styles.buttonStyles} !bg-red-600`}
+              >
+                Clear Mesh
+              </button>
+            </div>
+          )}
+        </>
       </Panel>
       {
         /* eslint-disable multiline-ternary */
