@@ -2,9 +2,12 @@ import { NumericFormat } from 'react-number-format'
 export default function Table ({
   is3D,
   isElements,
+  isSplits,
   isBaseMesh,
   cellSetter,
   itemList,
+  lastRow,
+  removeSplit,
   styles
 }) {
   let headers = (
@@ -34,6 +37,23 @@ export default function Table ({
         ))}
       </tr>
     )
+  } else if (isSplits) {
+    headers = (
+      <tr>
+        <th scope='col' className='px-6 text-lg py-3' />
+        <th scope='col' className='px-6 text-lg py-3'>
+          Node 1
+        </th>
+        <th scope='col' className='px-6 text-lg py-3'>
+          Node 2
+        </th>
+
+        <th scope='col' className='px-6 text-lg py-3'>
+          Num Splits
+        </th>
+        <th scope='col' className='px-6 text-lg py-3' />
+      </tr>
+    )
   }
   const rowLabel = index => {
     return `${isElements ? 'Element' : 'Node'} ${index}`
@@ -51,7 +71,7 @@ export default function Table ({
                 key={rowIndex}
                 className='bg-white border-b dark:bg-gray-800 dark:border-gray-700'
               >
-                <td className='px-6 py-4'>{rowLabel(rowIndex)}</td>
+                <td className='px-6 py-4'>{!isSplits && rowLabel(rowIndex)}</td>
                 {row.length > 0 &&
                   row.map((cell, cellIndex) => (
                     <td
@@ -74,8 +94,31 @@ export default function Table ({
                       }
                     </td>
                   ))}
+                {isSplits && (
+                  <td className='px-6 py-4'>
+                    <button
+                      type='button'
+                      className={`
+                      ${styles.buttonStyles} !bg-red-600`}
+                      onClick={e => removeSplit(rowIndex)}
+                    >
+                      Remove
+                    </button>
+                  </td>
+                )}
               </tr>
             ))}
+          {lastRow && (
+            <tr className='bg-white border-b dark:bg-gray-800 dark:border-gray-700'>
+              <td className='px-6 py-4' />
+              {lastRow.map((cell, index) => (
+                <td key={index} className='px-6 py-4'>
+                  {cell}
+                </td>
+              ))}
+              <td className='px-6 py-4' />
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

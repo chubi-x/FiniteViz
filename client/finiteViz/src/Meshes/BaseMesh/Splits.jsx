@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Table from '../../views/Table'
 export default function Splits ({ nodes, state, generateMesh, styles }) {
   const { splitting, baseMeshDispatch } = state
   const { buttonStyles } = styles
@@ -24,12 +25,8 @@ export default function Splits ({ nodes, state, generateMesh, styles }) {
   const newSplitComplete = newSplit.every(cell => cell !== '')
 
   function addSplits () {
-    if (newSplitComplete) {
-      // if (splitting.length === 0) {
-      baseMeshDispatch({ type: 'splitting', payload: [...splitting, newSplit] })
-      setNewSplit(['', '', ''])
-      // } else console.log('greater')
-    } else window.alert('Enter the first set of splitting!')
+    baseMeshDispatch({ type: 'splitting', payload: [...splitting, newSplit] })
+    setNewSplit(['', '', ''])
   }
 
   async function checkSplits () {
@@ -61,7 +58,6 @@ export default function Splits ({ nodes, state, generateMesh, styles }) {
       })
     )
   }
-  // console.log(splitting)
   function printNodes () {
     return populateNodes().map((option, index) => (
       <option value={option} key={index}>
@@ -69,67 +65,76 @@ export default function Splits ({ nodes, state, generateMesh, styles }) {
       </option>
     ))
   }
+  const addSplitsRow = [
+    <select
+      key={0}
+      defaultValue='Choose Node'
+      onChange={e => updatenewSplit(e, 'node1')}
+    >
+      <option disabled value='Choose Node'>
+        Choose Node
+      </option>
+      {printNodes()}
+    </select>,
+    <select
+      key={1}
+      defaultValue='Choose Node'
+      // value={newSplit[1]}
+      onChange={e => updatenewSplit(e, 'node2')}
+    >
+      <option disabled value='Choose Node'>
+        Choose Node
+      </option>
+      {printNodes()}
+    </select>,
+    <input
+      key={2}
+      className='bg-white px-6 py-4 dark:bg-gray-600 h-full w-full border'
+      value={newSplit[2]}
+      onChange={e => updatenewSplit(e, 'numSplits')}
+      type='text'
+      pattern={/^[2-9]\d*$/}
+    />
+  ]
+  //   ( splitting.map((split, index) => (
+  //     <div key={index} className='flex space-x-6 bg-red-400'>
+  //       <div className='inline-block'>Node 1 : {split[0]} </div>
+
+  //       <div className='inline-block'>Node 2 : {split[1]} </div>
+
+  //       <div className='inline-block'>NumSplits : {split[2]} </div>
+  //       <button
+  //         type='button'
+  //         className='mr-auto bg-blue-400 rounded-md p-1'
+  //         onClick={e => removeSplit(index)}
+  //       >
+  //         Remove
+  //       </button>
+  //     </div>
+  //  )))
   return (
     <form id='splitting' className='my-10 space-y-4'>
+      <h1 className='text-2xl font-bold'>Splits</h1>
+
       <div className='my-6'>
-        {splitting.length > 0 &&
-          splitting.map((split, index) => (
-            <div key={index} className='flex space-x-6 bg-red-400'>
-              <div className='inline-block'>Node 1 : {split[0]} </div>
-
-              <div className='inline-block'>Node 2 : {split[1]} </div>
-
-              <div className='inline-block'>NumSplits : {split[2]} </div>
-              <button
-                type='button'
-                className='mr-auto bg-blue-400 rounded-md p-1'
-                onClick={e => removeSplit(index)}
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-      </div>
-
-      <div>
-        Node 1:{' '}
-        <select
-          defaultValue='Choose Node'
-          // value={newSplit[0]}
-          onChange={e => updatenewSplit(e, 'node1')}
-        >
-          <option disabled value='Choose Node'>
-            Choose Node
-          </option>
-          {printNodes()}
-        </select>
-        Node 2:{' '}
-        <select
-          defaultValue='Choose Node'
-          // value={newSplit[1]}
-          onChange={e => updatenewSplit(e, 'node2')}
-        >
-          <option disabled value='Choose Node'>
-            Choose Node
-          </option>
-          {printNodes()}
-        </select>
-        Num Splits
-        <input
-          value={newSplit[2]}
-          onChange={e => updatenewSplit(e, 'numSplits')}
-          type='text'
-          pattern={/^[2-9]\d*$/}
+        <Table
+          styles={styles}
+          itemList={splitting}
+          isSplits
+          lastRow={addSplitsRow}
+          removeSplit={removeSplit}
         />
       </div>
-
-      <div>
+      <div className='flex'>
         <button
+          disabled={!newSplitComplete}
           type='button'
           onClick={addSplits}
-          className='bg-yellow-50 p-1 text-black rounded-md'
+          className={`${
+            !newSplitComplete ? 'cursor-not-allowed' : ''
+          } ${buttonStyles} w-auto ml-auto`}
         >
-          New Split
+          Add Split
         </button>
       </div>
       <div>
