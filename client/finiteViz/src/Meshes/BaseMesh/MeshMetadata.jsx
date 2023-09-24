@@ -20,9 +20,13 @@ export default function MeshMetadata ({
 
   function updateNumNodes () {
     let numNodes
-    if (numDims === 2 || (numElements > 1 && numDims === 3)) {
+    if (
+      (numDims === 2 && numElements !== 1) ||
+      (numElements > 1 && numDims === 3)
+    ) {
       numNodes = numElements + nodesPerElement
     } else numNodes = nodesPerElement
+
     setNumNodes(numNodes)
   }
   function enterCoords () {
