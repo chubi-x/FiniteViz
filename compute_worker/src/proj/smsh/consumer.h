@@ -460,7 +460,7 @@ public:
             json task_payload = {
                 {"task_id", *results.task_id},
                 {"status", results.status},
-                {"payload", results.payload != nullptr ? *results.payload : nullptr},
+                {"payload", results.payload != nullptr ? *results.payload : json(nullptr)},
                 {"message", results.message}};
             results.status == TaskStatus[SUCCESS] ? ack_message(envelope) : reject_message(envelope);
             send_results(results.task_id, &task_payload);
