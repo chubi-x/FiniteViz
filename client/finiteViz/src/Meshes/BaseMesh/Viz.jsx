@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry.js'
+import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry'
 
 // import { MapControls } from 'three/addons/controls/MapControls.js'
 
@@ -17,7 +17,7 @@ export default function Viz ({ coordinates, elements, isBaseMesh, is3D }) {
     observer.observe(refContainer.current)
     fontLoader.load('fonts/helvetica.json', font => {
       drawPoints(scene, font)
-      connectElements(font, scene)
+      elements.length > 0 && connectElements(font, scene)
       setupOrbitControls(camera, renderer)
     })
 
@@ -110,8 +110,7 @@ export default function Viz ({ coordinates, elements, isBaseMesh, is3D }) {
           })
       }
       const lineMaterial = new THREE.LineBasicMaterial({
-        color: 'green',
-        linewidth: 0.01
+        color: 'green'
       })
       let geometry, line
       if (is3D) {
