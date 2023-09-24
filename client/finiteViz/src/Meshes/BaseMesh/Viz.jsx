@@ -71,8 +71,11 @@ export default function Viz ({ coordinates, elements, isBaseMesh, is3D }) {
     // const mapControls = new MapControls(camera, renderer.domElement)
     // mapControls.screenSpacePanning = true
     orbitControls.enableZoom = true
-    orbitControls.enablePan = !!is3D
+    orbitControls.enablePan = true
     orbitControls.enableRotate = !!is3D
+    orbitControls.screenSpacePanning = !!is3D
+    orbitControls.maxDistance = 3
+    orbitControls.minDistance = 0.1
     // return orbitControls
   }
   function drawPoints (scene, font) {
