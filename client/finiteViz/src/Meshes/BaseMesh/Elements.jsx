@@ -19,6 +19,21 @@ export default function Elements ({ state, numNodes, showSplits, styles }) {
       })
     }
   }, [])
+  useEffect(() => {
+    let newElements
+    if (elements.length >= numElements) {
+      newElements = elements.slice(0, numElements)
+    } else {
+      newElements = elements.slice()
+      for (let i = 0; i < numElements - elements.length; i++) {
+        newElements.push(new Array(nodesPerElement).fill(''))
+      }
+    }
+    baseMeshDispatch({
+      type: 'elements',
+      payload: newElements
+    })
+  }, [numElements])
   const checkElementsComplete = () => {
     return elements.every(el => el.every(node => node !== ''))
   }
