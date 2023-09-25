@@ -47,16 +47,25 @@ export default function Splits ({ nodes, state, generateMesh, styles }) {
   }
   function updatenewSplit (e, cell) {
     let cellIndex
+    let setSplits = true
     if (cell === 'node1') cellIndex = 0
     else if (cell === 'node2') cellIndex = 1
-    else cellIndex = 2
-    setNewSplit(prev =>
-      prev.map((cell, index) => {
-        if (index === cellIndex) {
-          return isNaN(parseInt(e.target.value)) ? '' : parseInt(e.target.value)
-        } else return cell
-      })
-    )
+    else {
+      cellIndex = 2
+      if (!isNaN(parseInt(e.target.value)) && parseInt(e.target.value) < 2) {
+        setSplits = false
+      }
+    }
+    setSplits &&
+      setNewSplit(prev =>
+        prev.map((cell, index) => {
+          if (index === cellIndex) {
+            return isNaN(parseInt(e.target.value))
+              ? ''
+              : parseInt(e.target.value)
+          } else return cell
+        })
+      )
   }
   function printNodes () {
     return populateNodes().map((option, index) => (
@@ -87,12 +96,20 @@ export default function Splits ({ nodes, state, generateMesh, styles }) {
       </option>
       {printNodes()}
     </select>,
+    //    <NumericFormat
+    //      key={2}
+    //    className='bg-white px-6 py-4 dark:bg-gray-600 h-full w-full border'
+    //    onValueChange={({ floatValue }) =>
+    //      cellSetter(rowIndex, cellIndex, floatValue)
+    //    }
+    //  />
     <input
       key={2}
       className='bg-white px-6 py-4 dark:bg-gray-600 h-full w-full border'
       value={newSplit[2]}
       onChange={e => updatenewSplit(e, 'numSplits')}
-      type='text'
+      type='number'
+      min={2}
       pattern={/^[2-9]\d*$/}
     />
   ]
