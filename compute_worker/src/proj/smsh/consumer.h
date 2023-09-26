@@ -345,22 +345,24 @@ private:
             return std::move(mesh_generation_error(e.what()));
         }
         // perform splitting
-        string split_error_nodes;
+        int node1, node2;
         try
         {
             // cout << "splitting..." << endl;
-
             for (const auto &node : mesh.splitting)
             {
+                node1 = node[0];
+                node2 = node[1];
                 fem.split(node[0], node[1], node[2]);
-                split_error_nodes = node[0] + " " + node[1];
-                cout << split_error_nodes;
             }
         }
         catch (const MosException &e)
         {
             BOOST_LOG_TRIVIAL(error) << "Error performing splitting: " << e.what();
-            return std::move(mesh_generation_error(("Error splitting Base Mesh " + split_error_nodes + e.what()).c_str()));
+            stringstream error;
+            error << "Error splitting Nodes " << node1 << "and " << node2 << " " << e.what();
+            // return std::move(mesh_generation_error(("Error splitting Nodes: " + node1 + string(", and ") + node2 + "\n" + e.what()).c_str()));
+            return std::move(mesh_generation_error(error.str().c_str()));
         }
         std::unique_ptr<NewFemMesh> new_mesh_results = std::move(fem.writeMeshToVector());
         // print out output
