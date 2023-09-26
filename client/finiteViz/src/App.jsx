@@ -8,7 +8,8 @@ import {
   meshReducer,
   meshMetadataReducer
 } from './reducers/meshReducer'
-
+import { ErrorBoundary } from 'react-error-boundary'
+import Error from './views/Error'
 export default function App () {
   const [baseMesh, baseMeshDispatch] = useReducer(meshReducer, {
     coordinates: [],
@@ -78,16 +79,21 @@ export default function App () {
       {
         /* eslint-disable multiline-ternary */
         baseActive ? (
-          <BaseMesh
-            styles={styles}
-            state={{
-              baseMesh,
-              baseMeshDispatch,
-              activeProp: { activeMeshPropState, activeMeshPropStateDispatch },
-              meshMetadata: { meshMetadataState, meshMetadataDispatch },
-              generateMesh
-            }}
-          />
+          <ErrorBoundary FallbackComponent={Error}>
+            <BaseMesh
+              styles={styles}
+              state={{
+                baseMesh,
+                baseMeshDispatch,
+                activeProp: {
+                  activeMeshPropState,
+                  activeMeshPropStateDispatch
+                },
+                meshMetadata: { meshMetadataState, meshMetadataDispatch },
+                generateMesh
+              }}
+            />
+          </ErrorBoundary>
         ) : (
           <OutputMesh id={meshId} />
         )
