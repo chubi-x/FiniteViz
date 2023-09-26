@@ -1,7 +1,6 @@
 import Tabs from './views/Tabs'
 import { OutputMesh } from './Meshes/OutputMesh/'
 import { BaseMesh } from './Meshes/BaseMesh'
-import Splits from './Meshes/BaseMesh/Splits'
 import { useReducer, useState } from 'react'
 import { useGenerateMesh } from './api/useQueryMesh'
 import {
@@ -34,7 +33,6 @@ export default function App () {
       showSplits: false
     }
   )
-  const { splitting } = baseMesh
   const [meshId, setMeshId] = useState(
     window.localStorage.getItem('meshId') ?? ''
   )
@@ -86,18 +84,10 @@ export default function App () {
               baseMesh,
               baseMeshDispatch,
               activeProp: { activeMeshPropState, activeMeshPropStateDispatch },
-              meshMetadata: { meshMetadataState, meshMetadataDispatch }
+              meshMetadata: { meshMetadataState, meshMetadataDispatch },
+              generateMesh
             }}
-          >
-            {activeMeshPropState.showSplits && (
-              <Splits
-                styles={styles}
-                state={{ splitting, baseMeshDispatch }}
-                generateMesh={generateMesh}
-                nodes={meshMetadataState.numNodes}
-              />
-            )}
-          </BaseMesh>
+          />
         ) : (
           <OutputMesh id={meshId} />
         )

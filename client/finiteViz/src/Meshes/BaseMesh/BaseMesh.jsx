@@ -2,18 +2,20 @@ import { useRef } from 'react'
 import MeshMetadata from './MeshMetadata'
 import Coordinates from './Coordinates'
 import Elements from './Elements'
+import Splits from './Splits'
 import Viz from './Viz'
 import { PanelGroup, Panel } from 'react-resizable-panels'
 import ResizeHandle from '../../components/ResizeHandle'
 
-export function BaseMesh ({ state, styles, children }) {
-  const { baseMesh, baseMeshDispatch, activeProp, meshMetadata } = state
+export function BaseMesh ({ state, styles }) {
+  const { baseMesh, baseMeshDispatch, activeProp, meshMetadata, generateMesh } =
+    state
   const { meshMetadataState, meshMetadataDispatch } = meshMetadata
   const { numDims, numElements, numNodes, nodesPerElement } = meshMetadataState
 
   const { activeMeshPropState, activeMeshPropStateDispatch } = activeProp
   const { showCoordinates, showElements } = activeMeshPropState
-  const { coordinates, elements } = baseMesh
+  const { coordinates, elements, splitting } = baseMesh
 
   const vizParent = useRef()
 
@@ -83,7 +85,14 @@ export function BaseMesh ({ state, styles, children }) {
               numNodes={numNodes}
             />
           )}
-          {children}
+          {activeMeshPropState.showSplits && (
+            <Splits
+              styles={styles}
+              state={{ splitting, baseMeshDispatch }}
+              generateMesh={generateMesh}
+              nodes={meshMetadataState.numNodes}
+            />
+          )}
           {(showCoordinates || showElements) && (
             <div className='mt-10'>
               <button
