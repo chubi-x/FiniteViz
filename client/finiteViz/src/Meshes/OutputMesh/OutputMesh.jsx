@@ -19,9 +19,15 @@ export function OutputMesh ({ id }) {
     ['poll-mesh', id],
     async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:3000/poll/${id}`, {
-          signal: AbortSignal.timeout(10000)
-        })
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/poll/${id}`,
+          {
+            headers: new Headers({
+              'ngrok-skip-browser-warning': 'true'
+            }),
+            signal: AbortSignal.timeout(10000)
+          }
+        )
         window.sessionStorage.setItem(
           `${id}-refetchCount`,
           parseInt(refetchCount) + 1
