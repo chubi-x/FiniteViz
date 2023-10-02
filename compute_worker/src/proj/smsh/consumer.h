@@ -2,6 +2,7 @@
 #pragma ide diagnostic ignored "cppcoreguidelines-pro-type-member-init"
 
 #include <iostream>
+#include <dotenv.h>
 #include <sstream>
 #include <signal.h>
 #include <bits/stdc++.h>
@@ -123,7 +124,7 @@ public:
 class Worker
 {
 private:
-    string REDIS_HOST = "tcp://172.17.0.2:6379";
+    string REDIS_HOST = std::getenv("REDIS_HOST");
     Redis redis;
     enum TaskStatus
     {
@@ -148,21 +149,22 @@ private:
 
     struct AmqpConnectors
     {
-        string AMQP_HOST = "172.17.0.3";
-        int AMQP_PORT = 5672;
-        string AMQP_USER = "guest";
-        string AMQP_PWD = "guest";
-        string AMQP_VHOST = "/";
-        string AMQP_QUEUE = "request";
+        string AMQP_PORT = std::getenv("AMQP_PORT");
+        string AMQP_USER = std::getenv("AMQP_USER");
+        string AMQP_PWD = std::getenv("AMQP_PWD");
+        string AMQP_VHOST = std::getenv("AMQP_VHOST");
+        string AMQP_QUEUE = std::getenv("AMQP_QUEUE");
+        string AMQP_HOST = std::getenv("RABBIT_HOST");
     };
 
     static Amqp amqp()
     {
+
         AmqpConnectors amqp_connector;
         BOOST_LOG_TRIVIAL(info) << "Creating AMQP Channel...";
 
         auto channel = AmqpClient::Channel::Create(amqp_connector.AMQP_HOST,
-                                                   amqp_connector.AMQP_PORT,
+                                                   stoi(amqp_connector.AMQP_PORT),
                                                    amqp_connector.AMQP_USER,
                                                    amqp_connector.AMQP_PWD,
                                                    amqp_connector.AMQP_VHOST);

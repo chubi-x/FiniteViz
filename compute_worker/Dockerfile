@@ -7,8 +7,6 @@ RUN apt-get -y update && apt-get install -y clang vim git wget \
     libssl-dev \
     gfortran\
     nlohmann-json3-dev
-    # #boost
-    # libboost-all-dev
 
 #copy and compile files
 COPY src /usr/src/worker/src
@@ -54,6 +52,12 @@ RUN make && make install
 WORKDIR /usr/src/worker/builds/redis/redis-plus-plus
 RUN git clone https://github.com/sewenew/redis-plus-plus.git && mv redis-plus-plus/* .
 WORKDIR /usr/src/worker/builds/redis/redis-plus-plus/build
+RUN cmake .. && make && make install
+
+#dotenv
+WORKDIR /usr/src/worker/builds/dotenv
+RUN git clone https://github.com/laserpants/dotenv-cpp.git
+WORKDIR /usr/src/worker/builds/dotenv/dotenv-cpp/build
 RUN cmake .. && make && make install
 
 WORKDIR /usr/src/worker/src/proj/smsh
