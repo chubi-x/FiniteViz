@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { PanelGroup, Panel } from 'react-resizable-panels'
 import ResizeHandle from '../../components/ResizeHandle'
 import { useQuery } from '@tanstack/react-query'
-import Viz from '../BaseMesh/Viz'
+import Viz from '../../views/Viz'
 import Table from '../../views/Table'
 
 export function OutputMesh ({ id }) {
@@ -13,7 +13,6 @@ export function OutputMesh ({ id }) {
   const refetchCount = window.sessionStorage.getItem(`${id}-refetchCount`) ?? 0
 
   const canRefetch = () => parseInt(refetchCount) < MAX_REFETCH && !errorMessage
-
   // if (!canRefetch) window.localStorage.setItem(`${id}-refetchCount`, 0)
   const { isFetching, data, isSuccess } = useQuery(
     ['poll-mesh', id],
@@ -45,7 +44,8 @@ export function OutputMesh ({ id }) {
     },
     {
       enabled: !resultsReady,
-      refetchInterval: canRefetch() ? 5000 : false
+      refetchInterval: canRefetch() ? 5000 : false,
+      refetchOnMount: false
     }
   )
 

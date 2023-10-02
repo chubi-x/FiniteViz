@@ -3,7 +3,7 @@ import MeshMetadata from './MeshMetadata'
 import Coordinates from './Coordinates'
 import Elements from './Elements'
 import Splits from './Splits'
-import Viz from './Viz'
+import Viz from '../../views/Viz'
 import { PanelGroup, Panel } from 'react-resizable-panels'
 import ResizeHandle from '../../components/ResizeHandle'
 

@@ -15,7 +15,7 @@ export default function Viz ({ coordinates, elements, isBaseMesh, is3D }) {
     const { scene, renderer, camera } = setupScene()
     const observer = handleViewerResize(renderer, camera, scene)
     observer.observe(refContainer.current)
-    fontLoader.load('fonts/helvetica.json', font => {
+    fontLoader.load('/fonts/helvetica.json', font => {
       drawPoints(scene, font)
       elements.length > 0 && connectElements(font, scene)
       setupOrbitControls(camera, renderer)
@@ -63,6 +63,12 @@ export default function Viz ({ coordinates, elements, isBaseMesh, is3D }) {
       ? container.replaceChildren(renderer.domElement)
       : container.appendChild(renderer.domElement)
     scene.position.set(-1, -0.5, 0)
+    scene.add(new THREE.AmbientLight(0x666666))
+
+    // point light
+
+    const light = new THREE.PointLight(0xffffff, 3, 0, 0)
+    camera.add(light)
 
     return { scene, camera, renderer }
   }
@@ -110,13 +116,22 @@ export default function Viz ({ coordinates, elements, isBaseMesh, is3D }) {
           })
       }
       const lineMaterial = new THREE.LineBasicMaterial({
-        color: 'green'
+        color: 'yellow'
       })
       let geometry, line
       if (is3D) {
         geometry = new ConvexGeometry(points)
         const edges = new THREE.EdgesGeometry(geometry)
         line = new THREE.LineSegments(edges, lineMaterial)
+        const material = new THREE.MeshLambertMaterial({
+          // color: 'white'
+          // opacity: 0.5
+          // side: THREE.DoubleSide,
+          // transparent: true
+        })
+
+        const mesh = new THREE.Mesh(geometry, material)
+        scene.add(mesh)
       } else {
         geometry = new THREE.BufferGeometry().setFromPoints(points)
         line = new THREE.LineLoop(geometry, lineMaterial)
@@ -130,7 +145,7 @@ export default function Viz ({ coordinates, elements, isBaseMesh, is3D }) {
         size: isBaseMesh ? 0.05 : 0.03,
         height: 0.02
       })
-      const labelMaterial = new THREE.MeshBasicMaterial({ color: 'yellow' })
+      const labelMaterial = new THREE.MeshBasicMaterial({ color: 'red' })
       const elLabel = new THREE.Mesh(textGeometry, labelMaterial)
       elLabel.position.set(center.x, center.y, center.z)
       scene.add(elLabel)
