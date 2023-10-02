@@ -5,6 +5,7 @@ import uuid
 import json
 import logging
 import sys
+from config import REDIS_HOST, REDIS_PORT
 from publisher import MessagePublisher
 import ResponseHandler
 
@@ -17,8 +18,8 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
     level=logging.ERROR,
 )
-REDIS_HOST = "172.17.0.2"
-pool = redis.ConnectionPool(host=REDIS_HOST, port=6379, db=0)
+
+pool = redis.ConnectionPool(host=REDIS_HOST, port=REDIS_PORT, db=0)
 redis_store = redis.Redis(connection_pool=pool, decode_responses=True)
 
 payload_keys = ["elements", "splitting", "coordinates"]
