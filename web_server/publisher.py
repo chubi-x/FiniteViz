@@ -1,7 +1,6 @@
 from typing import Tuple
 import pika
-
-# from pika.adapters.blocking_connection import BlockingChannel
+from config import RABBIT_HOST
 from pika.exceptions import (
     UnroutableError,
     StreamLostError,
@@ -22,8 +21,6 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
     level=logging.WARNING,
 )
-
-RABBIT_HOST = "172.17.0.3"
 
 
 class MessagePublisher:
