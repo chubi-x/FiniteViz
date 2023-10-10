@@ -1,4 +1,5 @@
-from flask import Flask, request
+from typing import Tuple
+from flask import Flask, request, Response
 from flask_cors import CORS
 import redis
 import uuid
@@ -22,7 +23,6 @@ logging.basicConfig(
 pool = redis.ConnectionPool(host=REDIS_HOST, port=REDIS_PORT, db=0)
 redis_store = redis.Redis(connection_pool=pool, decode_responses=True)
 
-payload_keys = ["elements", "splitting", "coordinates"]
 app = Flask(__name__)
 CORS(app)
 app.logger.setLevel(logging.DEBUG)
@@ -32,10 +32,8 @@ app.logger.addHandler(handler)
 publisher = MessagePublisher()
 
 
-@app.post("/message")
-def message():
-    task_id = str(uuid.uuid4())
-    payload = request.get_json()
+def validate_input(payload) -> Tuple[bool, str]:
+    payload_keys = ["elements", "splitting", "coordinates"]
     missing = []
     for key in payload_keys:
         if key not in payload:
@@ -44,51 +42,56 @@ def message():
         is_list = isinstance(payload[key], list)
         is_empty = not len(payload[key]) > 0
         if is_list and (not is_empty and not isinstance(payload[key][0], list)):
-            return ResponseHandler.client_error(
-                message=f"key '{key}' is not a 2D array"
-            )
+            return False, f"key '{key}' is not a 2D array"
         elif is_empty or not is_list:
-            return ResponseHandler.client_error(
-                message=f"key '{key}' is empty or not an array"
-            )
+            return False, f"key '{key}' is empty or not an array"
     if len(missing) > 0:
-        return ResponseHandler.client_error(
-            message=f"Missing keys '{', '.join(missing)}' in payload"
-        )
-
-    message = {
-        "task_id": task_id,
-        "payload": payload,
-        "status": ResponseHandler.MESSAGE_STATUS.PROCESSING.value,
-    }
-    # save task to redis
-    try:
-        redis_store.set(task_id, json.dumps(message))
-    except Exception as err:
-        LOGGER.error("Error saving task to redis: %s", str(err))
-        return ResponseHandler.server_error(
-            message="Error processing task. Please try again later."
-        )
-
-    message_sent, err = publisher.send_message(message)
-    consumers_active = publisher.check_consumers_active()
-    if message_sent and consumers_active:
-        return ResponseHandler.task_creation_success(
-            meta={"task_id": task_id}, payload=None
-        )
+        return False, f"Missing keys '{', '.join(missing)}' in payload"
     else:
-        if err:
-            LOGGER.error(f"Error sending message to queue {err}", exc_info=True)
-        if not consumers_active:
-            LOGGER.error("Consumers might be inactive")
-            return ResponseHandler.task_creation_error(
-                meta={"task_id": task_id},
-                payload=None,
-                message="Mesh generator is down. Please try again later.",
+        return True, ""
+
+
+@app.post("/message")
+def message():
+    task_id = str(uuid.uuid4())
+    payload = request.get_json()
+    valid, error_message = validate_input(payload)
+    if not valid:
+        return ResponseHandler.client_error(message=error_message)
+    else:
+        message = {
+            "task_id": task_id,
+            "payload": payload,
+            "status": ResponseHandler.MESSAGE_STATUS.PROCESSING.value,
+        }
+        # save task to redis
+        try:
+            redis_store.set(task_id, json.dumps(message))
+        except Exception as err:
+            LOGGER.error("Error saving task to redis: %s", str(err))
+            return ResponseHandler.server_error(
+                message="Error processing task. Please try again later."
             )
-        return ResponseHandler.task_creation_error(
-            meta={"task_id": task_id}, payload=None
-        )
+
+        message_sent, err = publisher.send_message(message)
+        consumers_active = publisher.check_consumers_active()
+        if message_sent and consumers_active:
+            return ResponseHandler.task_creation_success(
+                meta={"task_id": task_id}, payload=None
+            )
+        else:
+            if err:
+                LOGGER.error(f"Error sending message to queue {err}", exc_info=True)
+            if not consumers_active:
+                LOGGER.error("Consumers might be inactive")
+                return ResponseHandler.task_creation_error(
+                    meta={"task_id": task_id},
+                    payload=None,
+                    message="Mesh generator is down. Please try again later.",
+                )
+            return ResponseHandler.task_creation_error(
+                meta={"task_id": task_id}, payload=None
+            )
 
 
 @app.get("/poll/<id>")
@@ -122,4 +125,4 @@ def poll(id: str):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=3000)
+    app.run(port=3000)

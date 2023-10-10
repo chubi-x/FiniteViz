@@ -133,7 +133,7 @@ def empty_task(
         Response: Flask Response
     """
     return Response(
-        __task_response_object(False, message, MESSAGE_STATUS.EMPTY.value, meta, None),
+        __task_response_object(False, message, MESSAGE_STATUS.EMPTY.value, meta, {}),
         status=status,
         mimetype="application/json",
         headers=HEADERS,
