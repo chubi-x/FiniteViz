@@ -1,5 +1,5 @@
 from typing import Tuple
-from flask import Flask, request, Response
+from flask import Flask, request
 from flask_cors import CORS
 import redis
 import uuid
@@ -124,5 +124,5 @@ def poll(id: str):
     return ResponseHandler.empty_task(meta={"task_id": id})
 
 
-if __name__ == "__main__":
-    app.run(port=3000)
+# if __name__ == "__main__":
+#     app.run(port=3000)
