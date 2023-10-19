@@ -30,7 +30,7 @@ class MessagePublisher:
     def __init__(self) -> None:
         pass
 
-    def create_channel(self) -> None:
+    def create_channel(self) -> bool:
         try:
             self._connection = pika.BlockingConnection(
                 pika.ConnectionParameters(
@@ -46,18 +46,18 @@ class MessagePublisher:
                     queue="request", durable=True, exclusive=False, auto_delete=False
                 )
             except ChannelClosedByBroker as err:
-                LOGGER.exception("Error declaring queue", err)
-                return None
+                LOGGER.exception("Error declaring queue: %s", err)
+                return False
 
             self._channel.confirm_delivery()
-            # return channel
+            return True
 
         except AMQPConnectionError as connection_error:
-            LOGGER.warning("RabbitMQ Connection error", connection_error)
+            LOGGER.exception("RabbitMQ Connection error: %s", connection_error)
+            return False
 
     def publish_message(self, message: str, routing_key: str) -> bool:
         try:
-            # print(channel.consumer_tags)
             if self._channel:
                 self._channel.basic_publish(
                     exchange="",
@@ -77,20 +77,24 @@ class MessagePublisher:
             return False
 
     def send_message(self, message) -> Tuple[bool, StreamLostError | None]:
-        self.create_channel()
-        try:
-            if self._channel and self.publish_message(message, "request"):
-                # self._channel.close()
-                return True, None
-            else:
-                return False, None
-        except StreamLostError as e1:
-            LOGGER.warning("Lost connection to channel %s", "Recreating connection", e1)
-            self.create_channel()
-            if self._channel:
-                return self.publish_message(message, "request"), None
-            else:
-                return False, e1
+        channel_created = self.create_channel()
+        if channel_created:
+            try:
+                if self._channel and self.publish_message(message, "request"):
+                    return True, None
+                else:
+                    return False, None
+            except StreamLostError as e1:
+                LOGGER.warning(
+                    "Lost connection to channel %s", "Recreating connection", e1
+                )
+                new_channel = self.create_channel()
+                if new_channel:
+                    return self.publish_message(message, "request"), None
+                else:
+                    return False, e1
+        else:
+            return False, None
 
     def check_consumers_active(self) -> bool:
         if self._channel:
