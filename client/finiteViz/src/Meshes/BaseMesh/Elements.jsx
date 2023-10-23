@@ -2,12 +2,6 @@ import { useEffect } from 'react'
 export default function Elements ({ state, numNodes, showSplits, styles }) {
   const { elements, baseMeshDispatch, nodesPerElement, numElements } = state
   const { buttonStyles } = styles
-  // const defaultElements = [
-  //   // [0, 1, 2, 3, 1],
-  //   // [1, 4, 5, 2, 1],
-  //   // [3, 2, 5, 6, 1]
-  //   [0, 1, 2, 3, 4, 5, 6, 7]
-  // ]
   const initialElements = Array.from({ length: numElements }, () =>
     new Array(nodesPerElement).fill('')
   )
@@ -78,7 +72,7 @@ export default function Elements ({ state, numNodes, showSplits, styles }) {
               <div>
                 {elementNodes().map((_, j) => (
                   <select
-                    defaultValue='Choose Node'
+                    defaultValue={elements[i][j]}
                     onChange={e => updateElements(i, j, e.target.value)}
                     key={j}
                   >

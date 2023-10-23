@@ -3,20 +3,6 @@ import Table from '../../views/Table'
 export default function Splits ({ nodes, state, generateMesh, styles }) {
   const { splitting, baseMeshDispatch } = state
   const { buttonStyles } = styles
-  // const defaultSplits = [
-  //   [0, 1, 5],
-  //   [0, 3, 5],
-  //   [1, 4, 4]
-  // ]
-  // const useDefaultSplits = false
-
-  // useEffect(
-  //   () =>
-  //     useDefaultSplits
-  //       ? baseMeshDispatch({ type: 'splitting', payload: defaultSplits })
-  //       : undefined,
-  //   []
-  // )
   const [newSplit, setNewSplit] = useState(['', '', ''])
   const splitsComplete = () =>
     splitting.length > 0 &&
@@ -76,6 +62,7 @@ export default function Splits ({ nodes, state, generateMesh, styles }) {
   }
   const addSplitsRow = [
     <select
+      className='text-black'
       key={0}
       defaultValue='Choose Node'
       onChange={e => updatenewSplit(e, 'node1')}
@@ -86,6 +73,7 @@ export default function Splits ({ nodes, state, generateMesh, styles }) {
       {printNodes()}
     </select>,
     <select
+      className='text-black'
       key={1}
       defaultValue='Choose Node'
       // value={newSplit[1]}

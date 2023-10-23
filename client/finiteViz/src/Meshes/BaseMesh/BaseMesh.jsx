@@ -33,10 +33,90 @@ export function BaseMesh ({ state, styles }) {
     meshMetadataDispatch({ type: 'nodesPerElement', payload: 0 })
     meshMetadataDispatch({ type: 'numNodes', payload: 0 })
   }
+  function setExamples (is3d) {
+    let coordinates, splitting, elements
+    let numDims, numElements, nodesPerElement, numNodes
+    if (is3d) {
+      numDims = 3
+      numElements = 1
+      nodesPerElement = 8
+      numNodes = 8
+      coordinates = [
+        [0, 0, 0],
+        [0, 0, 1],
+        [0, 1, 0],
+        [1, 0, 0],
+        [0, 1, 1],
+        [1, 0, 1],
+        [1, 1, 0],
+        [1, 1, 1]
+      ]
+      elements = [[0, 3, 6, 2, 1, 5, 7, 4]]
+      splitting = [
+        [0, 1, 5],
+        [1, 5, 4]
+      ]
+    } else {
+      numDims = 2
+      numElements = 3
+      nodesPerElement = 4
+      numNodes = 7
+      coordinates = [
+        [0.0, 0.0],
+        [1.0, 0.0],
+        [1.0, 1.0],
+        [0.0, 1.0],
+        [2.0, 0.0],
+        [2.0, 2.0],
+        [0.0, 2.0]
+      ]
+      splitting = [
+        [0, 1, 5],
+        [0, 3, 5],
+        [1, 4, 4]
+      ]
+      elements = [
+        [0, 1, 2, 3],
+        [1, 4, 5, 2],
+        [3, 2, 5, 6]
+      ]
+    }
+    const types = [
+      { name: 'coordinates', payload: coordinates },
+      { name: 'elements', payload: elements },
+      { name: 'splitting', payload: splitting }
+    ]
+    meshMetadataDispatch({ type: 'numDims', payload: numDims })
+    meshMetadataDispatch({ type: 'numElements', payload: numElements })
+    meshMetadataDispatch({ type: 'nodesPerElement', payload: nodesPerElement })
+    meshMetadataDispatch({ type: 'numNodes', payload: numNodes })
+
+    types.forEach(({ name, payload }) => {
+      baseMeshDispatch({
+        type: name,
+        payload
+      })
+      activeMeshPropStateDispatch({ type: name, payload: true })
+    })
+  }
   return (
     <PanelGroup direction='horizontal'>
       <Panel defaultSize={20} minSize={20} className='!overflow-y-scroll'>
         <>
+          <div className='flex space-x-6 mb-6'>
+            <button
+              onClick={() => setExamples(false)}
+              className={styles.buttonStyles + ' !bg-green-600'}
+            >
+              2D Example
+            </button>
+            <button
+              onClick={() => setExamples(true)}
+              className={styles.buttonStyles + ' !bg-green-600'}
+            >
+              3D Example
+            </button>
+          </div>
           <MeshMetadata
             dims={{
               numDims,

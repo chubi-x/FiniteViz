@@ -12,17 +12,6 @@ export default function Coordinates ({
     new Array(numDims).fill('')
   )
   const { buttonStyles } = styles
-
-  // const [useDefaultCoordinates] = useState(false)
-  // const defaultCoordinates = [
-  //   [0.0, 0.0],
-  //   [1.0, 0.0],
-  //   [1.0, 1.0],
-  //   [0.0, 1.0],
-  //   [2.0, 0.0],
-  //   [2.0, 2.0],
-  //   [0.0, 2.0]
-  // ]
   useEffect(() => {
     let newCoords
     if (coordinates.length === 0) {
