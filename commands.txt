@@ -1,1 +1,3 @@
 Running rabbitmq : g++ <cpp file> -o <executable > -lSimpleAmqpClient -lboost_chrono -lboost_system -lrabbitmq -lrt -lssl -lcrypto -ldl -lpthread -lredis++ -lhiredis
+
+If refusing to connect allow firewall to access ports using :sudo ufw allow <port>
