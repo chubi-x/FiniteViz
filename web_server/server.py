@@ -100,7 +100,9 @@ def poll(id: str):
         result = redis_store.get(id)
     except Exception as err:
         return ResponseHandler.server_error(message="Error processing task.")
-    if result is not None:
+    if result is None:
+        return ResponseHandler.empty_task(meta={"task_id": id})
+    else:
         results_object = json.loads(result)
         if results_object["status"] == ResponseHandler.MESSAGE_STATUS.SUCCESS.value:
             return ResponseHandler.task_success(
@@ -120,8 +122,6 @@ def poll(id: str):
                 message=results_object["message"],
                 payload=None,
             )
-
-    return ResponseHandler.empty_task(meta={"task_id": id})
 
 
 # if __name__ == "__main__":
