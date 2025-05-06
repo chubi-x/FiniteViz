@@ -1,3 +1,4 @@
+import sys
 from typing import Tuple
 import pika
 from config import RABBIT_HOST
@@ -13,13 +14,14 @@ import json
 import logging
 
 # LOG_FORMAT = "%(levelname) -10s %(asctime)s %(name) -30s %(funcName) -35s %(lineno) -5d: %(message)s"
-LOGGER = logging.getLogger(__name__)
+
+LOGGER = logging.getLogger(__file__)
+
 logging.basicConfig(
-    filename="publisher.log",
-    filemode="a",
+    handlers=[logging.StreamHandler(sys.stdout)],
     format="%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s",
     datefmt="%H:%M:%S",
-    level=logging.WARNING,
+    level=logging.DEBUG,
 )
 
 
