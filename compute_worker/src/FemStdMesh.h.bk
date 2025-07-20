@@ -1,0 +1,29 @@
+
+#include "../../proj/smsh/NewMesh.h"
+
+inline std::unique_ptr<NewMesh> FemStdMesh::writeMeshToVector() {
+  auto mesh = std::make_unique<NewMesh>();
+  mesh->coordinates = std::make_unique<std::vector<std::vector<double>>>();
+  mesh->elements = std::make_unique<std::vector<std::vector<int>>>();
+
+  int numnp = getNumnp();
+  for (int i = 0; i < numnp; ++i) {
+    std::vector<double> node_coords;
+    for (int j = 0; j < ndm; ++j) {
+      node_coords.push_back(x[i * ndm + j]);
+    }
+    mesh->coordinates->push_back(std::move(node_coords));
+  }
+
+  LOOP_OVER_ELEM {
+    std::vector<int> elem_nodes;
+    for (int j = 0; j < ELEM.ix.n; ++j) {
+      elem_nodes.push_back(ELEM.ix[j]);
+    }
+    mesh->elements->push_back(std::move(elem_nodes));
+  }
+
+  mesh->success = true;
+  mesh->message = "Mesh vector generated successfully";
+  return mesh;
+}
