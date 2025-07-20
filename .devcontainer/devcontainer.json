@@ -4,15 +4,13 @@
   "name": "FiniteViz",
   "workspaceFolder": "/workspaces/finiteViz",
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/finiteViz,type=bind,consistency=cached",
-  "containerUser": "finiteviz",
-  "remoteUser": "finiteviz",
+  "containerUser": "ubuntu",
+  "remoteUser": "ubuntu",
   "updateRemoteUserUID": true,
-  "service": "devpod",
-  "build": {
-    "dockerfile": "Dockerfile"
-  }, 
+  "service": "worker",
+  "dockerComposeFile": "../devcontainer.yml",
   "customizations": {
-    "devpod": {
+    "worker": {
       "prebuildRepository": "ghcr.io/chubi-x/finiteviz"
     }
   },
@@ -22,7 +20,6 @@
   //],
   "postCreateCommand": "./post-create.sh",
   "runArgs": ["--network=host"],
-  "forwardPorts": [4500]
 
   // Features to add to the dev container. More info: https://containers.dev/features.
   // "features": {},

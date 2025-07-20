@@ -2,13 +2,15 @@ FROM ubuntu:noble
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-ARG USERNAME=finiteviz
-
-RUN groupadd  $USERNAME \
-  && useradd -g $USERNAME -m  $USERNAME \
-&& chgrp -R finiteviz /root \
+ARG USERNAME=ubuntu
+ARG UID
+ARG GID
+RUN EXISTING_GROUP=$(getent group "$GID" | cut -d: -f1)  \
+  # groupadd --gid $GID $USERNAME \
+  && usermod -g $EXISTING_GROUP $USERNAME \
+  && chgrp -R $EXISTING_GROUP /root \
     && chmod g+rx /root && chmod -R g+r /root \
-  && apt-get update && apt-get install -y sudo 
+  && apt-get update && apt-get install -y sudo gosu
 
 RUN echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers \
   && chmod 0440 /etc/sudoers
@@ -21,7 +23,7 @@ RUN apt-get install -y clang git wget \
   libboost-thread1.74.0 \
   libboost-log1.74.0 \
   libboost-log-dev \ 
-  neovim cargo unzip python3 python3-venv
+  neovim cargo unzip python3 python3-venv tmux
 #copy and compile files
 # COPY ../compute_worker/src /app
 # RUN chgrp -R finiteviz /app && chmod g+rx /app
@@ -63,7 +65,6 @@ WORKDIR /redis/redis-plus-plus
 RUN git clone https://github.com/sewenew/redis-plus-plus.git && mv redis-plus-plus/* .
 WORKDIR /redis/redis-plus-plus/build
 RUN cmake .. && make && make install
-
 # create links for shared libraries
 RUN ldconfig
 CMD [ "bash" ]
