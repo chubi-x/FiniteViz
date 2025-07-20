@@ -1,8 +1,7 @@
 dev
 ext
 lib/*/*
-!lib/other/MyOutputStream.h
-Makefile
-proj/smsh/*
-!proj/smsh/consumer.h
-!proj/smsh/simple_mesh.cpp
+# Makefile
+# proj/smsh/*
+# !proj/smsh/consumer.h
+# !proj/smsh/simple_mesh.cpp
