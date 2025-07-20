@@ -1,5 +1,6 @@
 services:
   redis:
+    hostname: redis
     image: valkey/valkey:8.1.2
   rabbitmq:
     image: rabbitmq:4.1.2
@@ -16,18 +17,27 @@ services:
     hostname: web_server
     build: web_server
     ports:
-      - 127.0.0.1:8000:3000
+      - 127.0.0.1:8000:5000
+    command: deploy/startup.dev.sh
     env_file:
       - .env
     volumes:
-      - ./web_server:/app/web_server
+      - ./web_server:/app
     depends_on:
       - redis
       - rabbitmq
 
-  # compute_worker:
-  #   build: compute_worker
-  # env_file:
-  # - .env
-  #   ports:
-  #     - 3000:3000
+  worker:
+    build:
+      context: ./.devcontainer/
+      args:
+          UID: ${UID:-1000}
+          GID: ${GID:-1000}
+    env_file:
+      - .env
+    command: sleep infinity
+    volumes:
+      - ./compute_worker/src:/workspaces/finiteViz:cached
+    depends_on:
+      - redis
+      - rabbitmq
