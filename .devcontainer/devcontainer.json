@@ -9,10 +9,8 @@
   "updateRemoteUserUID": true,
   "service": "devpod",
   "build": {
-    "dockerfile": "Dockerfile",
-    "context": "."
-  },
-
+    "dockerfile": "Dockerfile"
+  }, 
   "customizations": {
     "devpod": {
       "prebuildRepository": "ghcr.io/chubi-x/finiteviz"
