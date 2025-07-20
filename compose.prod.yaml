@@ -1,0 +1,14 @@
+services:
+  client:
+    build: client
+    ports:
+      - 3000:3000
+  web_server:
+    build: web_server
+    ports:
+      - 8000:3000
+
+  # compute_worker:
+  #   build: compute_worker
+  #   ports:
+  #     - 3000:3000
