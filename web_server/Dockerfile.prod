@@ -1,0 +1,18 @@
+FROM python:3.11-slim
+
+# Install runtime dependencies only
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY . /app
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Use a non-root user for security
+RUN useradd -m -u 1001 appuser
+USER appuser
+
+# Run using gunicorn (assume web_server.expose:app is the entrypoint)
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "server:app"]
+

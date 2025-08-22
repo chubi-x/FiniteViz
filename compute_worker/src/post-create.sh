@@ -13,10 +13,5 @@ make colred.o && make dasol.o && make datest.o && make datri.o && make dsred.o &
 	make neo_Hooke_elasticity.o && make phelp.o && make prgError.o && make prgWarning.o &&
 	make small_strain_elasticity.o
 mv ./obj/* ../../ext/obj
-# chmod 700 /home/finiteviz/.ssh
-# chmod 600 /home/finiteviz/.ssh/* # or your private key filename
-# chown -R finiteviz:finiteviz /home/finiteviz/.ssh
-
-# mkdir -p /home/finiteviz/.config
-# cd /home/finiteviz/.config
-# git clone git@github.com:chubi-x/nvim-config nvim
+make simple_mesh.o
+make

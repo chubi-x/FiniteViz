@@ -1,14 +1,48 @@
 services:
+  redis:
+    hostname: redis
+    image: valkey/valkey:8.1.2
+  rabbitmq:
+    image: rabbitmq:4.1.2
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
   client:
     build: client
+    env_file:
+      - .env
+    command: deploy/startup.prod.sh
     ports:
-      - 3000:3000
+      - 127.0.0.1:3000:3000
+    volumes:
+      - ./client/finiteViz:/app
   web_server:
-    build: web_server
+    hostname: web_server
+    build:
+      context: ./web_server
+      dockerfile: Dockerfile.prod
     ports:
-      - 8000:3000
+      - 127.0.0.1:8000:5000
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - rabbitmq
 
-  # compute_worker:
-  #   build: compute_worker
-  #   ports:
-  #     - 3000:3000
+  worker:
+    build:
+      context: ./compute_worker
+      dockerfile: Dockerfile.prod
+    env_file:
+      - .env
+    restart: always
+    mem_limit: 1g
+    cpus: 1.0
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exit 0"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      - redis
+      - rabbitmq

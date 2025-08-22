@@ -2,32 +2,30 @@ FROM ubuntu:noble
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-ARG USERNAME=ubuntu
-ARG UID
-ARG GID
-RUN EXISTING_GROUP=$(getent group "$GID" | cut -d: -f1)  \
-  # groupadd --gid $GID $USERNAME \
-  && usermod -g $EXISTING_GROUP $USERNAME \
-  && chgrp -R $EXISTING_GROUP /root \
-    && chmod g+rx /root && chmod -R g+r /root \
-  && apt-get update && apt-get install -y sudo gosu
-
-RUN echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers \
-  && chmod 0440 /etc/sudoers
-RUN apt-get install -y clang git wget \
-  #cpp stuff
+# Install runtime dependencies only
+RUN apt-get update && apt-get install -y \
+  clang \
+  git \
+  wget \
   build-essential \
   libssl-dev \
-  gfortran\
+  gfortran \
   nlohmann-json3-dev \
   libboost-thread1.74.0 \
   libboost-log1.74.0 \
-  libboost-log-dev \ 
-  neovim cargo unzip python3 python3-venv tmux
-#copy and compile files
-# COPY ../compute_worker/src /app
-# RUN chgrp -R finiteviz /app && chmod g+rx /app
-# INSTALL ALL REQUIREMENTS
+  libboost-log-dev \
+  python3 \
+  python3-venv \
+  unzip && rm -rf /var/lib/apt/lists/*
+
+# Copy application code
+COPY src /app
+WORKDIR /app
+
+# Use non-root user for security
+RUN useradd -m -u 1001 appuser
+USER appuser
+
 WORKDIR /boost
 
 #boost
@@ -69,13 +67,13 @@ RUN cmake .. && make && make install
 RUN ldconfig
 
 
-COPY . /workspaces/finiteViz
+COPY . /app
 RUN mkdir -p /dotenv 
 WORKDIR /dotenv
 RUN git clone https://github.com/laserpants/dotenv-cpp.git
-RUN mkdir -p /workspaces/finiteViz/include
-RUN cp -rn dotenv-cpp/include/ /workspaces/finiteViz/
-WORKDIR /workspaces/finiteViz/proj/smsh
+RUN mkdir -p /app/include
+RUN cp -rn dotenv-cpp/include/ /app
+WORKDIR app/proj/smsh
 RUN make colred.o && make dasol.o && make datest.o && make datri.o && make dsred.o && \
  make dured.o && make ma41.o && make ma41_dep.o && \
  make ma41_dep2.o && make math_matrix.o && make math_other.o && make math_tensor.o && \
@@ -85,3 +83,4 @@ RUN mv ./obj/* ../../ext/obj
 RUN make simple_mesh.o
 RUN make
 CMD [ "finiteViz-worker"]
+

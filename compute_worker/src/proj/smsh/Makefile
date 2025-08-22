@@ -39,7 +39,7 @@ LIB   = -L/usr/lib64 -lm -lstdc++ -lgfortran \
 # --- commands -------------------------------------------------------
 
 default: 
-	@($(CC) ./obj/*.o ../../ext/obj/*.o $(COPT) $(LIB) -o finiteViz)
+	@($(CC) ./obj/*.o ../../ext/obj/*.o $(COPT) $(LIB) -o finiteViz-worker)
 
 %.o: %.cpp
 	$(CC) -c $(COPT) $(CINCL) $< -o ./obj/$@

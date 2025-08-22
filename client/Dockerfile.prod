@@ -1,0 +1,12 @@
+# Production multi-stage build for client service
+FROM node:lts AS build
+WORKDIR /app
+COPY finiteViz /app
+RUN npm install && npm run build
+
+# Serve static files with nginx
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+
